@@ -3,7 +3,6 @@ package com.cooksys.socialmedia.entities;
 import java.sql.Timestamp;
 import java.util.List;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -17,7 +16,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "user")
+@Table(name = "\"user\"")
 @NoArgsConstructor
 @Data
 public class User {
