@@ -56,13 +56,17 @@ public class User {
     )
     private List<Tweet> tweetMentions; 
 
-    @ManyToMany
-    @JoinTable(
-        name = "followers_following",
-        joinColumns = @JoinColumn(name = "follower_id"),
-        inverseJoinColumns = @JoinColumn(name = "following_id")
-    )
+    @ManyToMany(mappedBy = "following")
+    // @JoinTable(
+    //     name = "followers_following",
+    //     joinColumns = @JoinColumn(name = "follower_id"),
+    //     inverseJoinColumns = @JoinColumn(name = "following_id")
+    // )
     private List<User> followers;
+
+    // modify set following in db
+    @ManyToMany
+    private List<User> following;
 
 
 }

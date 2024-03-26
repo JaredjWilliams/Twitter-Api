@@ -31,9 +31,9 @@ public class Tweet {
 
     private String content;
 
-    private Integer inReplyTo;
+    // private Integer inReplyTo;
 
-    private Integer repostOf;
+    // private Integer repostOf;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
@@ -63,9 +63,15 @@ public class Tweet {
     )
     private List<Hashtag> hashtags;
 
-    @OneToMany(mappedBy = "author")
+    @OneToMany(mappedBy = "replyTo")
     private List<Tweet> replies;
 
-    @OneToMany(mappedBy = "author")
+    @ManyToOne
+    private Tweet replyTo;
+
+    @OneToMany(mappedBy = "repostOf")
     private List<Tweet> reposts;
+
+    @ManyToOne
+    private Tweet repostOf;
 }
