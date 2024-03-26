@@ -1,14 +1,15 @@
 package com.cooksys.socialmedia.mappers;
 
 
+import java.util.List;
+
+import org.mapstruct.Mapper;
+
 import com.cooksys.socialmedia.dtos.tweet.TweetRequestDto;
 import com.cooksys.socialmedia.dtos.tweet.TweetResponseDto;
 import com.cooksys.socialmedia.entities.Tweet;
-import org.mapstruct.Mapper;
 
-import java.util.List;
-
-@Mapper(componentModel = "spring", uses = ProfileMapper.class)
+@Mapper(componentModel = "spring", uses = UserMapper.class)
 public interface TweetMapper {
 
     Tweet requestDtoToEntity(TweetRequestDto tweetDto);

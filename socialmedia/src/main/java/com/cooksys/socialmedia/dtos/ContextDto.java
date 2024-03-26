@@ -11,12 +11,9 @@ import java.util.List;
 @Data
 public class ContextDto {
 
-    @NonNull
     private TweetResponseDto target;
 
-    @NonNull
     private List<TweetResponseDto> before;
 
-    @NonNull
     private List<TweetResponseDto> after;
 }
