@@ -38,7 +38,6 @@ public class User {
     @OneToMany(mappedBy = "author")
     private List<Tweet> tweets;
 
-    // @ManyToMany(cascade = CascadeType.ALL)
     @ManyToMany
     @JoinTable(
         name = "user_likes",
@@ -47,7 +46,6 @@ public class User {
     )
     private List<Tweet> tweetLikes;
 
-    // @ManyToMany(cascade = CascadeType.ALL)
     @ManyToMany
     @JoinTable(
         name = "user_mentions",
@@ -56,13 +54,11 @@ public class User {
     )
     private List<Tweet> tweetMentions; 
 
-    @ManyToMany
-    @JoinTable(
-        name = "followers_following",
-        joinColumns = @JoinColumn(name = "follower_id"),
-        inverseJoinColumns = @JoinColumn(name = "following_id")
-    )
+    @ManyToMany(mappedBy = "following")
     private List<User> followers;
+
+    @ManyToMany
+    private List<User> following;
 
 
 }
