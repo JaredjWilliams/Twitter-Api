@@ -29,31 +29,41 @@ public class User {
     @Embedded
     private Credentials credentials;
 
+    @Embedded
+    private Profile profile;
+
     private Timestamp joined;
 
     private Boolean deleted;
 
-    @Embedded
-    private Profile profile;
-
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "author")
     private List<Tweet> tweets;
 
-    @ManyToMany(cascade = CascadeType.ALL)
+    // @ManyToMany(cascade = CascadeType.ALL)
+    @ManyToMany
     @JoinTable(
         name = "user_likes",
         joinColumns = @JoinColumn(name = "user_id"),
         inverseJoinColumns = @JoinColumn(name = "tweet_id")
     )
-    private List<Tweet> likes;
+    private List<Tweet> tweetLikes;
 
-    @ManyToMany(cascade = CascadeType.ALL)
+    // @ManyToMany(cascade = CascadeType.ALL)
+    @ManyToMany
     @JoinTable(
         name = "user_mentions",
         joinColumns = @JoinColumn(name = "user_id"),
         inverseJoinColumns = @JoinColumn(name = "tweet_id")
     )
-    private List<Tweet> mentions; 
+    private List<Tweet> tweetMentions; 
+
+    @ManyToMany
+    @JoinTable(
+        name = "followers_following",
+        joinColumns = @JoinColumn(name = "follower_id"),
+        inverseJoinColumns = @JoinColumn(name = "following_id")
+    )
+    private List<User> followers;
 
 
 }

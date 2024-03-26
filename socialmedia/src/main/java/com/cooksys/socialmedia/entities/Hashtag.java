@@ -7,7 +7,9 @@ import java.util.List;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -26,7 +28,12 @@ public class Hashtag {
 
     private Timestamp lastUsed;
 
-    @OneToMany(mappedBy = "tweet_id")
-    private List<Tweet> tweetHashtags;
+    @ManyToMany
+    @JoinTable(
+        name = "tweet_hashtags",
+        joinColumns = @JoinColumn(name = "hashtag_id"),
+        inverseJoinColumns = @JoinColumn(name = "tweet_id")
+    )
+    private List<Tweet> tweets;
 
 }
