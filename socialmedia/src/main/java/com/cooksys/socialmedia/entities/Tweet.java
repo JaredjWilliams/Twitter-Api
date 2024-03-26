@@ -3,6 +3,7 @@ package com.cooksys.socialmedia.entities;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.sql.Timestamp;
 import java.util.List;
@@ -20,9 +21,10 @@ public class Tweet {
     @JoinColumn(name = "author")
     private User author;
 
+    @CreationTimestamp
     private Timestamp posted;
 
-    private Boolean deleted;
+    private Boolean deleted = false;
 
     private String content;
 
