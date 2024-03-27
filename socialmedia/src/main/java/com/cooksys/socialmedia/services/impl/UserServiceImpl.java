@@ -25,7 +25,7 @@ public class UserServiceImpl implements UserService {
     private final CredentialsMapper credentialsMapper;
 
     private User getUserByCredentials(CredentialsDto credentialsDto) {
-        return userRepository.findByCredentials(credentialsMapper.dtoToEntity(credentialsDto));
+        return userRepository.findByCredentials_Username(credentialsDto.getUsername());
     }
 
     @Override
@@ -39,6 +39,8 @@ public class UserServiceImpl implements UserService {
     public UserResponseDto createUser(UserRequestDto userRequestDto) {
 
         User user = getUserByCredentials(userRequestDto.getCredentials());
+
+        System.out.println(user);
 
         if (isUserCreatedAndNotDeleted(user)) {
             throw new BadRequestException("User can't be created because the user already exists");
