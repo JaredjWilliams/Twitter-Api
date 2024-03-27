@@ -1,12 +1,11 @@
 package com.cooksys.socialmedia.controllers;
 
 
+import com.cooksys.socialmedia.dtos.user.UserRequestDto;
 import com.cooksys.socialmedia.dtos.user.UserResponseDto;
 import com.cooksys.socialmedia.services.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -20,5 +19,10 @@ public class UserController {
     @GetMapping
     public List<UserResponseDto> getUsers() {
         return userService.getUsers();
+    }
+
+    @PostMapping
+    public UserResponseDto createUser(@RequestBody UserRequestDto userRequestDto) {
+        return userService.createUser(userRequestDto);
     }
 }
