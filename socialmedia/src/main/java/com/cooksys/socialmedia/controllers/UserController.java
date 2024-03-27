@@ -56,4 +56,5 @@ public class UserController {
     public List<UserResponseDto> getFollowing(@PathVariable("username") String username){
         return userService.getFollowing(username);
     }
+
 }
