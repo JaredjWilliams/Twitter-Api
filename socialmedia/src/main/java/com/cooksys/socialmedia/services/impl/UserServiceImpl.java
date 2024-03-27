@@ -25,7 +25,7 @@ public class UserServiceImpl implements UserService {
     private final CredentialsMapper credentialsMapper;
 
     private User getUserByCredentials(CredentialsDto credentialsDto) {
-        return userRepository.findByCredentials_Username(credentialsDto.getUsername());
+        return userRepository.findByCredentialsUsername(credentialsDto.getUsername());
     }
 
     @Override
