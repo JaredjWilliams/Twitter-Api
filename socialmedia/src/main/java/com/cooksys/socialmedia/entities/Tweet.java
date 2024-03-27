@@ -3,7 +3,6 @@ package com.cooksys.socialmedia.entities;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.sql.Timestamp;
@@ -19,7 +18,6 @@ public class Tweet {
     private Long id;
 
     @ManyToOne
-    @ToString.Exclude
     private User author;
 
     @CreationTimestamp
@@ -30,7 +28,6 @@ public class Tweet {
     private String content;
 
     @ManyToMany(mappedBy="tweetLikes")
-    @ToString.Exclude
     private List<User> userLikes;
 
     @ManyToMany
@@ -38,7 +35,6 @@ public class Tweet {
         name = "user_mentions",
         joinColumns = @JoinColumn(name = "tweet_id"),
         inverseJoinColumns = @JoinColumn(name = "user_id"))
-    @ToString.Exclude
     private List<User> userMentions; 
 
     @ManyToMany

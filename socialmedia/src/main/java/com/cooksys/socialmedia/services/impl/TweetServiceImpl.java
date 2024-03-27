@@ -1,19 +1,18 @@
 package com.cooksys.socialmedia.services.impl;
 
 import com.cooksys.socialmedia.dtos.tweet.TweetResponseDto;
-import com.cooksys.socialmedia.entities.Tweet;
 import com.cooksys.socialmedia.entities.User;
 import com.cooksys.socialmedia.exceptions.NotFoundException;
 import com.cooksys.socialmedia.mappers.TweetMapper;
 import com.cooksys.socialmedia.repositories.UserRepository;
 import com.cooksys.socialmedia.services.TweetService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
@@ -23,10 +22,13 @@ public class TweetServiceImpl implements TweetService {
     private final TweetMapper tweetMapper;
 
     public User getUser(String username) {
+
         User user = userRepository.findByCredentialsUsername(username);
+
         if (user == null) {
             throw new NotFoundException("User not found with username: " + username);
         }
+
         return user;
     }
 
