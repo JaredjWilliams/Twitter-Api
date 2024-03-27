@@ -8,8 +8,9 @@ import lombok.Data;
 @Data
 public class Credentials {
 
-    @Column(unique = true)
+    @Column(unique = true, nullable=false)
     private String username;
 
+    @Column(nullable=false)
     private String password;
 }

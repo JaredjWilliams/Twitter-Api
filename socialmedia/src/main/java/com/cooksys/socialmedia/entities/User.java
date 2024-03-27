@@ -40,12 +40,7 @@ public class User {
     )
     private List<Tweet> tweetLikes;
 
-    @ManyToMany
-    @JoinTable(
-        name = "user_mentions",
-        joinColumns = @JoinColumn(name = "user_id"),
-        inverseJoinColumns = @JoinColumn(name = "tweet_id")
-    )
+    @ManyToMany(mappedBy="userMentions")
     private List<Tweet> tweetMentions; 
 
     @ManyToMany(mappedBy = "following")

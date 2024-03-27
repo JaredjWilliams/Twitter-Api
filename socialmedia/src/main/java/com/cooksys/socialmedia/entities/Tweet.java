@@ -18,7 +18,6 @@ public class Tweet {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "author")
     private User author;
 
     @CreationTimestamp
@@ -28,15 +27,7 @@ public class Tweet {
 
     private String content;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User user;
-
-    @ManyToMany
-    @JoinTable(
-        name = "user_likes",
-        joinColumns = @JoinColumn(name = "tweet_id"),
-        inverseJoinColumns = @JoinColumn(name = "user_id"))
+    @ManyToMany(mappedBy="tweetLikes")
     private List<User> userLikes;
 
     @ManyToMany
