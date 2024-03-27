@@ -1,5 +1,6 @@
 package com.cooksys.socialmedia.services;
 
+import com.cooksys.socialmedia.dtos.tweet.TweetResponseDto;
 import com.cooksys.socialmedia.dtos.user.UserRequestDto;
 import com.cooksys.socialmedia.dtos.user.UserResponseDto;
 
@@ -9,4 +10,6 @@ public interface UserService {
     List<UserResponseDto> getUsers();
 
     UserResponseDto createUser(UserRequestDto userCreationRequestDto);
+
+    List<TweetResponseDto> getTweetsFromUser(String username);
 }
