@@ -104,19 +104,6 @@ public class TweetServiceImpl implements TweetService {
 
     @Override
     public List<TweetResponseDto> getTweets() {
-        List<Tweet> tweList = tweetRepository.findAll();
-        List<TweetResponseDto> tweets = new ArrayList<>();
-        for (Tweet tweet : tweList){
-            if (tweet.getDeleted() != true)
-                tweets.add(tweetMapper.entityToResponseDto(tweet));
-        }
-        Collections.sort(tweets, new Comparator<TweetResponseDto>() {
-            public int compare(TweetResponseDto t1, TweetResponseDto t2) {
-                if (t1.getPosted() == null || t2.getPosted() == null)
-                  return 0;
-                return t2.getPosted().compareTo(t1.getPosted());
-            }
-          });
-        return tweets;
+        return tweetMapper.entitiesToResponseDtos(tweetRepository.findByDeletedFalseOrderByPostedDesc());
     }
 }
