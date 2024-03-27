@@ -25,7 +25,7 @@ public class TweetController {
         return tweetService.getTweets();
     }
 
-    @GetMapping("/{id}/tags")
+    @GetMapping("/{id}/mentions")
     public List<UserResponseDto> getMentions(@PathVariable("id") Long id){
         return tweetService.getMentions(id);
     }
