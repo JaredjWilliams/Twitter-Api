@@ -1,9 +1,11 @@
 package com.cooksys.socialmedia.services.impl;
 
 import com.cooksys.socialmedia.dtos.tweet.TweetResponseDto;
+import com.cooksys.socialmedia.entities.Tweet;
 import com.cooksys.socialmedia.entities.User;
 import com.cooksys.socialmedia.exceptions.NotFoundException;
 import com.cooksys.socialmedia.mappers.TweetMapper;
+import com.cooksys.socialmedia.repositories.TweetRepository;
 import com.cooksys.socialmedia.repositories.UserRepository;
 import com.cooksys.socialmedia.services.TweetService;
 import lombok.RequiredArgsConstructor;
@@ -13,12 +15,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class TweetServiceImpl implements TweetService {
 
     private final UserRepository userRepository;
+    private final TweetRepository tweetRepository;
     private final TweetMapper tweetMapper;
 
     public User getUser(String username) {
@@ -30,6 +34,16 @@ public class TweetServiceImpl implements TweetService {
         }
 
         return user;
+    }
+
+    public Tweet getTweetById(Long id) {
+        if (id == null) {
+            throw new NotFoundException("Tweet with id not found: " + id);
+        }
+
+        Tweet tweet = tweetRepository.getReferenceById(id);
+
+        return tweet;
     }
 
     @Override
@@ -54,5 +68,17 @@ public class TweetServiceImpl implements TweetService {
           });
 
         return tweets;
+    }
+
+    @Override
+    public List<TweetResponseDto> getTweetReplies(Long id) {
+        Tweet tweet = getTweetById(id);
+        // List<TweetResponseDto> replies = new ArrayList<>();
+
+        // for (Tweet reply : tweet.getReplies()) {
+        //     replies.add(tweetMapper.entityToResponseDto(reply));
+        // }
+
+        return tweetMapper.entitiesToResponseDtos(tweet.getReplies());
     }
 }
