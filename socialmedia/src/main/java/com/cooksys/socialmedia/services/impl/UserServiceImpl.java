@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 @Service
@@ -95,7 +96,13 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<UserResponseDto> getFollowing(String username) {
         User user = userRepository.findByCredentialsUsername(username);
-        List<User> followedUsers = user.getFollowing();
-        return userMapper.entitiesToResponseDtos(followedUsers);
+        List<User> followingUsers = user.getFollowing();
+        Iterator<User> iterator = followingUsers.iterator();
+        while(iterator.hasNext()){
+            User u = iterator.next();
+            if (u.getDeleted() == true)
+                iterator.remove();
+        }
+        return userMapper.entitiesToResponseDtos(followingUsers);
     }
 }
