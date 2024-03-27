@@ -93,13 +93,14 @@ public class TweetServiceImpl implements TweetService {
 
     @Override
     public List<UserResponseDto> getMentions(Long id) {
+
         Tweet tweet = tweetRepository.getReferenceById(id);
-        List<User> mentionedUsers = tweet.getUserMentions();
-        List<UserResponseDto> mentionedUserResponseDtos = new ArrayList<>();
-        for (User u : mentionedUsers){
-            mentionedUserResponseDtos.add(userMapper.entityToResponseDto(u));
+
+        if (tweet == null || tweet.getDeleted()) {
+            throw new NotFoundException("Tweet not found with id: " + id);
         }
-        return mentionedUserResponseDtos;
+
+        return userMapper.entitiesToResponseDtos(tweet.getUserMentions());
     }
 
     @Override
