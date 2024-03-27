@@ -1,8 +1,7 @@
 package com.cooksys.socialmedia.services;
 
-import java.util.List;
-
 import com.cooksys.socialmedia.dtos.tweet.TweetResponseDto;
+import java.util.List;
 
 public interface TweetService {
 
