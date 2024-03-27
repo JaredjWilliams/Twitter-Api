@@ -1,6 +1,11 @@
 package com.cooksys.socialmedia.services.impl;
 
+import com.cooksys.socialmedia.dtos.CredentialsDto;
+import com.cooksys.socialmedia.dtos.user.UserRequestDto;
 import com.cooksys.socialmedia.dtos.user.UserResponseDto;
+import com.cooksys.socialmedia.entities.User;
+import com.cooksys.socialmedia.exceptions.BadRequestException;
+import com.cooksys.socialmedia.mappers.CredentialsMapper;
 import com.cooksys.socialmedia.mappers.UserMapper;
 import com.cooksys.socialmedia.repositories.UserRepository;
 import com.cooksys.socialmedia.services.UserService;
@@ -17,10 +22,33 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final CredentialsMapper credentialsMapper;
+
+    private User getUserByCredentials(CredentialsDto credentialsDto) {
+        return userRepository.findByCredentialsAndDeletedFalse(credentialsMapper.dtoToEntity(credentialsDto));
+    }
 
     @Override
     @ResponseStatus(HttpStatus.OK)
     public List<UserResponseDto> getUsers() {
         return userMapper.entitiesToResponseDtos(userRepository.findByDeletedFalse());
+    }
+
+    @Override
+    @ResponseStatus(HttpStatus.CREATED)
+    public UserResponseDto createUser(UserRequestDto userRequestDto) {
+
+        User user = getUserByCredentials(userRequestDto.getCredentials());
+
+        if (user != null && !user.getDeleted()) {
+            throw new BadRequestException("Username already exists");
+        }
+
+        if (user != null) {
+            user.setDeleted(false);
+            return userMapper.entityToResponseDto(userRepository.save(user));
+        }
+
+        return userMapper.entityToResponseDto(userRepository.save(userMapper.requestDtoToEntity(userRequestDto)));
     }
 }
