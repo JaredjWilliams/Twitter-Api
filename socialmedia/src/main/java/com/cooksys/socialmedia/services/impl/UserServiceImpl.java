@@ -66,6 +66,11 @@ public class UserServiceImpl implements UserService {
         return tweetMapper.entitiesToResponseDtos(user.getTweets());
     }
 
+    @Override
+    public UserResponseDto deleteUser(String username) {
+        return null;
+    }
+
     private boolean isUserCreatedAndNotDeleted(User user) {
         return user != null && !user.getDeleted();
     }

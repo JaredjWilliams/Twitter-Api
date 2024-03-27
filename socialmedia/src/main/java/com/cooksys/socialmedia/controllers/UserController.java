@@ -44,4 +44,10 @@ public class UserController {
     public UserResponseDto createUser(@RequestBody UserRequestDto userRequestDto) {
         return userService.createUser(userRequestDto);
     }
+
+    @DeleteMapping("/@{username}")
+    @ResponseStatus(HttpStatus.OK)
+    public UserResponseDto deleteUser(@PathVariable("username") String username) {
+        return userService.deleteUser(username);
+    }
 }
