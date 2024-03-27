@@ -25,7 +25,7 @@ public class UserServiceImpl implements UserService {
     private final CredentialsMapper credentialsMapper;
 
     private User getUserByCredentials(CredentialsDto credentialsDto) {
-        return userRepository.findByCredentialsAndDeletedFalse(credentialsMapper.dtoToEntity(credentialsDto));
+        return userRepository.findByCredentials(credentialsMapper.dtoToEntity(credentialsDto));
     }
 
     @Override
@@ -40,15 +40,23 @@ public class UserServiceImpl implements UserService {
 
         User user = getUserByCredentials(userRequestDto.getCredentials());
 
-        if (user != null && !user.getDeleted()) {
-            throw new BadRequestException("Username already exists");
+        if (isUserCreatedAndNotDeleted(user)) {
+            throw new BadRequestException("User can't be created because the user already exists");
         }
 
-        if (user != null) {
+        if (isUserDeleted(user)) {
             user.setDeleted(false);
             return userMapper.entityToResponseDto(userRepository.save(user));
         }
 
-        return userMapper.entityToResponseDto(userRepository.save(userMapper.requestDtoToEntity(userRequestDto)));
+        return userMapper.entityToResponseDto(userRepository.saveAndFlush(userMapper.requestDtoToEntity(userRequestDto)));
+    }
+
+    private boolean isUserCreatedAndNotDeleted(User user) {
+        return user != null && !user.getDeleted();
+    }
+
+    private boolean isUserDeleted(User user) {
+        return user != null && user.getDeleted();
     }
 }
