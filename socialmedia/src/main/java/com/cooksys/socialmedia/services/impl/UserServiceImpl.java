@@ -8,7 +8,6 @@ import com.cooksys.socialmedia.entities.User;
 import com.cooksys.socialmedia.exceptions.BadRequestException;
 import com.cooksys.socialmedia.mappers.TweetMapper;
 import com.cooksys.socialmedia.mappers.UserMapper;
-import com.cooksys.socialmedia.repositories.TweetRepository;
 import com.cooksys.socialmedia.repositories.UserRepository;
 import com.cooksys.socialmedia.services.UserService;
 import lombok.RequiredArgsConstructor;
@@ -19,8 +18,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
-
-    private final TweetRepository tweetRepository;
+    
     private final UserRepository userRepository;
 
     private final TweetMapper tweetMapper;
@@ -65,8 +63,7 @@ public class UserServiceImpl implements UserService {
             throw new BadRequestException("User has been deleted");
         }
 
-        return tweetMapper.entitiesToResponseDtos(
-                tweetRepository.findByAuthorOrderByPostedDesc(user));
+        return tweetMapper.entitiesToResponseDtos(user.getTweets());
     }
 
     private boolean isUserCreatedAndNotDeleted(User user) {
