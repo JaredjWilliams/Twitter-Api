@@ -50,4 +50,10 @@ public class UserController {
     public UserResponseDto createUser(@RequestBody UserRequestDto userRequestDto) {
         return userService.createUser(userRequestDto);
     }
+
+    @GetMapping("/@{username}/following")
+    @ResponseStatus(HttpStatus.OK)
+    public List<UserResponseDto> getFollowing(@PathVariable("username") String username){
+        return userService.getFollowing(username);
+    }
 }

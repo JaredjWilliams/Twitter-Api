@@ -15,6 +15,7 @@ import com.cooksys.socialmedia.services.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -91,4 +92,10 @@ public class UserServiceImpl implements UserService {
         return userMapper.entityToResponseDto(user);
     }
 
+    @Override
+    public List<UserResponseDto> getFollowing(String username) {
+        User user = userRepository.findByCredentialsUsername(username);
+        List<User> followedUsers = user.getFollowing();
+        return userMapper.entitiesToResponseDtos(followedUsers);
+    }
 }
