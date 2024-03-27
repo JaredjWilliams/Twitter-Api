@@ -1,9 +1,6 @@
 {
     "java.compile.nullAnalysis.mode": "automatic",
     "java.configuration.updateBuildConfiguration": "interactive",
-<<<<<<< HEAD
-    "maven.view": "flat"
-=======
+    "maven.view": "flat",
     "java.debug.settings.onBuildFailureProceed": true
->>>>>>> master
 }
