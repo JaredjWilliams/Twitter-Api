@@ -131,6 +131,8 @@ public class TweetServiceImpl implements TweetService {
         return tweetMapper.entitiesToResponseDtos(tweet.getReplies());
     }
 
+
+
     private List<User> createUserMentions(Tweet tweet) {
         List<User> users = new ArrayList<>();
 
@@ -165,6 +167,13 @@ public class TweetServiceImpl implements TweetService {
         tweet.setAuthor(userRepository.findByCredentialsUsername(credentialsDto.getUsername()));
         tweet.setRepostOf(getTweet(id));
         tweetRepository.saveAndFlush(tweet);
+        return tweetMapper.entityToResponseDto(tweet);
+    }
+
+    @Override
+    public TweetResponseDto getTweetById(Long id) {
+        Tweet tweet = getTweet(id);
+        validateTweet(tweet);
         return tweetMapper.entityToResponseDto(tweet);
     }
 
