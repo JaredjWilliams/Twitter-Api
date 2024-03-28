@@ -1,6 +1,9 @@
 package com.cooksys.socialmedia.services.impl;
 
 import com.cooksys.socialmedia.dtos.tweet.TweetRequestDto;
+
+import com.cooksys.socialmedia.dtos.CredentialsDto;
+
 import com.cooksys.socialmedia.dtos.tweet.TweetResponseDto;
 import com.cooksys.socialmedia.dtos.user.UserResponseDto;
 import com.cooksys.socialmedia.entities.Hashtag;
@@ -10,21 +13,22 @@ import com.cooksys.socialmedia.exceptions.BadRequestException;
 import com.cooksys.socialmedia.exceptions.NotFoundException;
 import com.cooksys.socialmedia.mappers.TweetMapper;
 import com.cooksys.socialmedia.mappers.UserMapper;
+
 import com.cooksys.socialmedia.repositories.HashtagRepository;
+
 import com.cooksys.socialmedia.repositories.TweetRepository;
 import com.cooksys.socialmedia.repositories.UserRepository;
 import com.cooksys.socialmedia.services.TweetService;
 import com.cooksys.socialmedia.utils.Filter;
 import com.cooksys.socialmedia.utils.Process;
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-
-
 
 
 @Service
@@ -152,6 +156,16 @@ public class TweetServiceImpl implements TweetService {
 
             hashtagRepository.save(tag);
         });
+    }
+
+
+    @Override
+    public TweetResponseDto postRepostOfTweet(Long id, CredentialsDto credentialsDto) {
+        Tweet tweet = new Tweet();
+        tweet.setAuthor(userRepository.findByCredentialsUsername(credentialsDto.getUsername()));
+        tweet.setRepostOf(getTweet(id));
+        tweetRepository.saveAndFlush(tweet);
+        return tweetMapper.entityToResponseDto(tweet);
     }
 
     public User getUser(String username) {

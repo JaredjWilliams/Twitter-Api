@@ -9,6 +9,7 @@ import java.util.regex.Pattern;
 
 public class Process {
 
+    // This method will return a list of all the usernames mentioned in a tweet.
     public static List<String> forUsers(Tweet tweet) {
         List<String> mentions = new ArrayList<>();
         Pattern pattern = Pattern.compile("@([a-zA-Z]+)");
@@ -22,6 +23,7 @@ public class Process {
         return mentions;
     }
 
+    // This method will return a list of all the hashtags mentioned in a tweet.
     public static List<String> forHashtags(Tweet tweet) {
         List<String> hashtags = new ArrayList<>();
         Pattern pattern = Pattern.compile("#([a-zA-Z]+)");

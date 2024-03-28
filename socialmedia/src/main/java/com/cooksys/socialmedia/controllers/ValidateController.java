@@ -26,7 +26,6 @@ public class ValidateController {
     public boolean usernameIsAvailable(@PathVariable("username") String username) {
         return validateService.usernameIsAvailable(username);
     }
-
     @GetMapping("/username/exists/@{username}")
     @ResponseStatus(HttpStatus.OK)
     public boolean doesUsernameExist(@PathVariable String username) {
@@ -34,3 +33,4 @@ public class ValidateController {
 
     }
 }
+
