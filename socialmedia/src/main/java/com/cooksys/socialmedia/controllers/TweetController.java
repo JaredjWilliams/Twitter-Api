@@ -1,5 +1,6 @@
 package com.cooksys.socialmedia.controllers;
 
+import com.cooksys.socialmedia.dtos.tweet.TweetRequestDto;
 import com.cooksys.socialmedia.dtos.CredentialsDto;
 import com.cooksys.socialmedia.dtos.tweet.TweetResponseDto;
 import com.cooksys.socialmedia.dtos.user.UserResponseDto;
@@ -24,6 +25,12 @@ public class TweetController {
 
     private final TweetService tweetService;
 
+    @PostMapping("/{id}/reply")
+    @ResponseStatus(HttpStatus.CREATED)
+    public TweetResponseDto replyToTweet(@PathVariable("id") Long id, @RequestBody TweetRequestDto tweetRequestDto) {
+        return tweetService.replyToTweet(id, tweetRequestDto);
+    }
+
     @GetMapping("{id}/likes")
     @ResponseStatus(HttpStatus.OK)
     public List<UserResponseDto> getUsersFromTweetLikes(@PathVariable Long id) {
@@ -37,16 +44,19 @@ public class TweetController {
     }
 
     @GetMapping
+    @ResponseStatus(HttpStatus.OK)
     public List<TweetResponseDto> getTweets(){
         return tweetService.getTweets();
     }
 
     @GetMapping("/{id}/mentions")
+    @ResponseStatus(HttpStatus.OK)
     public List<UserResponseDto> getMentions(@PathVariable("id") Long id){
         return tweetService.getMentions(id);
     }
 
     @GetMapping("/{id}/replies")
+    @ResponseStatus(HttpStatus.OK)
     public List<TweetResponseDto> getTweetReplies(@PathVariable("id") Long id) {
         return tweetService.getTweetReplies(id);
     } 
@@ -65,4 +75,10 @@ public class TweetController {
     public void createLike(@PathVariable("id") Long id, @RequestBody CredentialsDto credentialsDto){
         tweetService.createLike(id, credentialsDto);
     }   
+        
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public TweetResponseDto deleteTweet(@PathVariable("id") Long id, @RequestBody CredentialsDto credentialsDto){
+        return tweetService.deleteTweet(id , credentialsDto);
+    }
 }
