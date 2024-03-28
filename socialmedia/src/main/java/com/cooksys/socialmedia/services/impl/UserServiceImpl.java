@@ -88,19 +88,39 @@ public class UserServiceImpl implements UserService {
         return userMapper.entityToResponseDto(userRepository.save(user));
     }
 
+
+    @Override
+    public List<TweetResponseDto> getUserMentions(String username) {
+        User user = userRepository.findByCredentialsUsername(username);
+        if (user == null) {
+            throw new NotFoundException("User not found");
+        }
+
+        if (user.getDeleted()) {
+            throw new BadRequestException("User is deleted");
+        }
+
+        return tweetMapper.entitiesToResponseDtos(buildSortedUserMentions(user.getTweetMentions()));
+    }
+
     @Override
     public UserResponseDto getUser(String username) {
         User user = userRepository.findByCredentialsUsername(username);
 
         if (user == null) {
             throw new NotFoundException("User not found with username: " + username);
-        }
+        } 
 
         else if (isUserDeleted(user)) {
             throw new BadRequestException("User: " + username + " is deleted");
         }
 
         return userMapper.entityToResponseDto(user);
+    }
+
+    private List<Tweet> buildSortedUserMentions(List<Tweet> tweets) {
+        return tweets.stream().filter(tweet -> !tweet.getDeleted()).sorted(
+                Comparator.comparing(Tweet::getPosted)).toList();
     }
 
     private void validateUser(User user) {
@@ -121,8 +141,9 @@ public class UserServiceImpl implements UserService {
         Iterator<User> iterator = followingUsers.iterator();
         while(iterator.hasNext()){
             User u = iterator.next();
-            if (u.getDeleted() == true)
+            if (u.getDeleted()) {
                 iterator.remove();
+            }
         }
         return userMapper.entitiesToResponseDtos(followingUsers);
     }
@@ -134,6 +155,5 @@ public class UserServiceImpl implements UserService {
     private boolean isUserDeleted(User user) {
         return user != null && user.getDeleted();
     }
-
 
 }
