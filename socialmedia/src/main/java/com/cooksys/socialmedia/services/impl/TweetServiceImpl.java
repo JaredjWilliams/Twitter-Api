@@ -76,8 +76,6 @@ public class TweetServiceImpl implements TweetService {
     }
 
     private void validateTweet(Tweet tweet) {
-
-
         if (tweet.getDeleted()) {
             throw new NotFoundException("Tweet has been deleted");
         }
