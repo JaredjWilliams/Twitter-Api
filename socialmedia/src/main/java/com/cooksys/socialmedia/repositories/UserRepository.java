@@ -10,8 +10,12 @@ import java.util.List;
 public interface UserRepository extends JpaRepository<User, Long> {
 
     List<User> findByDeletedFalse();
-
     User findByCredentialsUsername(String username);
 
+<<<<<<< HEAD
     List<User> findByFollowingCredentialsUsernameAndDeletedFalse(String username);
+=======
+    boolean existsByCredentialsUsername(String username);
+    
+>>>>>>> master
 }

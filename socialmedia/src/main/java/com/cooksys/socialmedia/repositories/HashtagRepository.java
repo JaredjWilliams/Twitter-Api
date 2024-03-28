@@ -8,4 +8,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface HashtagRepository extends JpaRepository<Hashtag, Long> {
 
+    Hashtag findByLabel(String label);
+
 }

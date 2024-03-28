@@ -1,5 +1,6 @@
 package com.cooksys.socialmedia.entities;
 
+import com.cooksys.socialmedia.utils.interfaces.Sortable;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -11,7 +12,7 @@ import java.util.List;
 @Entity
 @NoArgsConstructor
 @Data
-public class Tweet {
+public class Tweet implements Sortable {
 
     @Id
     @GeneratedValue
