@@ -1,5 +1,6 @@
 package com.cooksys.socialmedia.services.impl;
 
+import com.cooksys.socialmedia.dtos.CredentialsDto;
 import com.cooksys.socialmedia.dtos.tweet.TweetResponseDto;
 import com.cooksys.socialmedia.dtos.user.UserResponseDto;
 import com.cooksys.socialmedia.entities.Tweet;
@@ -133,4 +134,17 @@ public class TweetServiceImpl implements TweetService {
         }
     }
 
+    @Override
+    public TweetResponseDto deleteTweet(Long id, CredentialsDto credentialsDto) {
+        Tweet tweetToBeDeleted = getTweet(id);
+        validateTweet(tweetToBeDeleted);
+
+        if (!tweetToBeDeleted.getAuthor().equals(userRepository.findByCredentialsUsername(credentialsDto.getUsername()))){
+            throw new BadRequestException("The specified user does not exist or is not the author of this tweet.");
+        }
+        
+        tweetToBeDeleted.setDeleted(true);
+        tweetRepository.saveAndFlush(tweetToBeDeleted);
+        return tweetMapper.entityToResponseDto(tweetToBeDeleted);
+    }
 }
