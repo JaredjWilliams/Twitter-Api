@@ -68,12 +68,12 @@ public class TweetServiceImpl implements TweetService {
         Tweet tweet = getTweet(id);
 
         validateTweet(tweet);
-        validateUsername(tweetRequestDto.getCredentialsDto().getUsername());
+        validateUsername(tweetRequestDto.getCredentials().getUsername());
         validateTweet(tweetRequestDto);
 
         Tweet newTweet = tweetMapper.requestDtoToEntity(tweetRequestDto);
 
-        newTweet.setAuthor(getUser(tweetRequestDto.getCredentialsDto().getUsername()));
+        newTweet.setAuthor(getUser(tweetRequestDto.getCredentials().getUsername()));
         newTweet.setInReplyTo(tweet);
         newTweet.setUserMentions(createUserMentions(newTweet));
 
