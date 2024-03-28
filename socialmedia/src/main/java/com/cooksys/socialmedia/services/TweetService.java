@@ -14,6 +14,9 @@ public interface TweetService {
 
     List<TweetResponseDto> getTweetsFromUserAndFollowers(String username);
 
+
+    List<TweetResponseDto> getTweetResposts(Long id);
+
     //ContextDto getContext(TweetRequestDto tweetRequestDto);
 
     List<UserResponseDto> getMentions(Long id);
@@ -22,5 +25,6 @@ public interface TweetService {
 
 
     List<TweetResponseDto> getTweetReplies(Long id);
+
 
 }
