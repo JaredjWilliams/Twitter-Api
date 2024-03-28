@@ -106,12 +106,30 @@ public class TweetServiceImpl implements TweetService {
 
         Tweet tweet =  tweetMapper.requestDtoToEntity(tweetRequestDto);
         tweet.setAuthor(userRepository.findByCredentialsUsername(username));
-        tweet.setContent(tweetRequestDto.getContent());
+
+        String[] content = tweet.getContent().split("\\s+");
+        List<User> usersMentioned = new ArrayList<>();
+
+        // Map user mentions
+        for (String subString : content) {
+            if (subString.charAt(0) == '@') {
+                User userMentioned = userRepository.findByCredentialsUsername(subString.substring(1));
+
+                if (userMentioned != null) {
+                    List<Tweet> tweets = userMentioned.getTweetMentions();
+                    tweets.add(tweet);
+                    userMentioned.setTweetMentions(tweets);
+                    usersMentioned.add(userMentioned);
+                    userRepository.saveAndFlush(userMentioned);
+                }
+            }
+        }
+
+        tweet.setUserMentions(usersMentioned);
         tweetRepository.saveAndFlush(tweet);
 
-        List<User> usersMentioned = new ArrayList<>();
-        String[] content = tweet.getContent().split("\\s+");
 
+        // Map user hashtags
         for (String subString : content) {
             // Add hashtag to tweet 
             if (subString.charAt(0) == '#') {
@@ -135,22 +153,8 @@ public class TweetServiceImpl implements TweetService {
                 }
 
             }
-
-            // Add mentioned user to tweet
-            if (subString.charAt(0) == '@') {
-                User userMentioned = userRepository.findByCredentialsUsername(subString.substring(1));
-
-                if (userMentioned != null) {
-                    List<Tweet> tweets = userMentioned.getTweetMentions();
-                    tweets.add(tweet);
-                    userMentioned.setTweetMentions(tweets);
-                    usersMentioned.add(userMentioned);
-                    userRepository.saveAndFlush(userMentioned);
-                }
-            }
         }
 
-        tweet.setUserMentions(usersMentioned);
         return tweetMapper.entityToResponseDto(tweet);
     }
 }
