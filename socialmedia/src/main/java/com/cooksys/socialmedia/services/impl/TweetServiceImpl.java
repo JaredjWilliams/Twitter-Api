@@ -116,11 +116,9 @@ public class TweetServiceImpl implements TweetService {
 
     @Override
     public TweetResponseDto postRepostOfTweet(Long id, CredentialsDto credentialsDto) {
-        User reposter = userRepository.findByCredentialsUsername(credentialsDto.getUsername());
         Tweet tweet = new Tweet();
-        Tweet repostedTweet = getTweetById(id);
-        tweet.setAuthor(reposter);
-        tweet.setRepostOf(repostedTweet);
+        tweet.setAuthor(userRepository.findByCredentialsUsername(credentialsDto.getUsername()));
+        tweet.setRepostOf(getTweetById(id));
         tweetRepository.saveAndFlush(tweet);
         return tweetMapper.entityToResponseDto(tweet);
     }
