@@ -4,6 +4,7 @@ package com.cooksys.socialmedia.controllers;
 import com.cooksys.socialmedia.dtos.tweet.TweetResponseDto;
 import com.cooksys.socialmedia.dtos.user.UserRequestDto;
 import com.cooksys.socialmedia.dtos.user.UserResponseDto;
+import com.cooksys.socialmedia.entities.User;
 import com.cooksys.socialmedia.services.TweetService;
 import com.cooksys.socialmedia.services.UserService;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +26,11 @@ public class UserController {
     @ResponseStatus(HttpStatus.OK)
     public List<UserResponseDto> getUsers() {
         return userService.getUsers();
+    }
+
+    @GetMapping("/@{username}")
+    public UserResponseDto getUser(@PathVariable("username") String username) {
+        return userService.getUser(username);
     }
 
     @GetMapping("/@{username}/feed")

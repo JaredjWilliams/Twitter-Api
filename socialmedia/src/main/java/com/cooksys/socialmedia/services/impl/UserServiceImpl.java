@@ -6,6 +6,8 @@ import com.cooksys.socialmedia.dtos.user.UserRequestDto;
 import com.cooksys.socialmedia.dtos.user.UserResponseDto;
 import com.cooksys.socialmedia.entities.User;
 import com.cooksys.socialmedia.exceptions.BadRequestException;
+import com.cooksys.socialmedia.exceptions.NotFoundException;
+import com.cooksys.socialmedia.mappers.CredentialsMapper;
 import com.cooksys.socialmedia.mappers.TweetMapper;
 import com.cooksys.socialmedia.mappers.UserMapper;
 import com.cooksys.socialmedia.repositories.UserRepository;
@@ -79,5 +81,19 @@ public class UserServiceImpl implements UserService {
         return user != null && user.getDeleted();
     }
 
+    @Override
+    public UserResponseDto getUser(String username) {
+        User user = userRepository.findByCredentialsUsername(username);
+
+        if (user == null) {
+            throw new NotFoundException("User not found with username: " + username);
+        } 
+
+        else if (isUserDeleted(user)) {
+            throw new BadRequestException("User: " + username + " is deleted");
+        }
+
+        return userMapper.entityToResponseDto(user);
+    }
 
 }
