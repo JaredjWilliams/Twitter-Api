@@ -15,7 +15,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -37,13 +36,15 @@ public class TweetServiceImpl implements TweetService {
     }
 
     public Tweet getTweetById(Long id) {
-        if (id == null) {
+        if (tweetRepository.findById(id).isEmpty()) {
             throw new NotFoundException("Tweet with id not found: " + id);
         }
 
-        Tweet tweet = tweetRepository.getReferenceById(id);
+        if (tweetRepository.getReferenceById(id).getDeleted() == true) {
+            throw new NotFoundException("Tweet with id: " + id + " is deleted");
+        }
 
-        return tweet;
+        return tweetRepository.getReferenceById(id);
     }
 
     @Override
@@ -72,13 +73,6 @@ public class TweetServiceImpl implements TweetService {
 
     @Override
     public List<TweetResponseDto> getTweetReplies(Long id) {
-        Tweet tweet = getTweetById(id);
-        // List<TweetResponseDto> replies = new ArrayList<>();
-
-        // for (Tweet reply : tweet.getReplies()) {
-        //     replies.add(tweetMapper.entityToResponseDto(reply));
-        // }
-
-        return tweetMapper.entitiesToResponseDtos(tweet.getReplies());
+        return tweetMapper.entitiesToResponseDtos(getTweetById(id).getReplies());
     }
 }
