@@ -2,12 +2,14 @@ package com.cooksys.socialmedia.services.impl;
 
 import com.cooksys.socialmedia.dtos.tweet.TweetResponseDto;
 import com.cooksys.socialmedia.dtos.user.UserResponseDto;
-
 import com.cooksys.socialmedia.entities.Tweet;
 import com.cooksys.socialmedia.entities.User;
 import com.cooksys.socialmedia.exceptions.BadRequestException;
 import com.cooksys.socialmedia.exceptions.NotFoundException;
 import com.cooksys.socialmedia.mappers.TweetMapper;
+
+import com.cooksys.socialmedia.mappers.UserMapper;
+
 
 import com.cooksys.socialmedia.mappers.UserMapper;
 
@@ -19,9 +21,11 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+
 
 
 @Service
@@ -56,13 +60,23 @@ public class TweetServiceImpl implements TweetService {
     }
 
     @Override
+
+    public List<UserResponseDto> getUsersFromTweetLikes(Long id) {
+        Tweet tweet = getTweet(id);
+        validateTweet(tweet);
+        return userMapper.entitiesToResponseDtos(tweet.getUserLikes().stream()
+                .filter(user -> !user.getDeleted())
+                .toList());
+    }
+
+    @Override
     public List<TweetResponseDto> getTweetResposts(Long id) {
         Tweet tweet = getTweet(id);
         validateTweet(tweet);
-        return tweetMapper.entitiesToResponseDtos(tweet.getReposts().stream().filter(t -> !t.getDeleted()).toList());
+        return tweetMapper.entitiesToResponseDtos(tweet.getReposts().stream()
+                .filter(t -> !t.getDeleted())
+                .toList());
     }
-
-
 
     /*@Override
     public ContextDto getContext(TweetRequestDto tweetDto) {
@@ -75,7 +89,6 @@ public class TweetServiceImpl implements TweetService {
     public boolean isTweetDeleted(tweet){
         return tweet != null && tweet.getDeleted();
     }*/
-    
 
     @Override
     public List<UserResponseDto> getMentions(Long id) {
@@ -94,7 +107,6 @@ public class TweetServiceImpl implements TweetService {
         Tweet tweet = getTweet(id);
         validateTweet(tweet);
         return tweetMapper.entitiesToResponseDtos(tweet.getReplies());
-
     }
 
     public User getUser(String username) {
