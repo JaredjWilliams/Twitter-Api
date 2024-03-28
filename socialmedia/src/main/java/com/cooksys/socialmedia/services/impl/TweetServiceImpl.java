@@ -81,7 +81,11 @@ public class TweetServiceImpl implements TweetService {
             ContextDto contextDto 
         }
         throw new NotFoundException("This tweet has been deleted");
+    }
+    public boolean isTweetDeleted(tweet){
+        return tweet != null && tweet.getDeleted();
     }*/
+    
 
     @Override
     public List<UserResponseDto> getMentions(Long id) {
