@@ -1,5 +1,6 @@
 package com.cooksys.socialmedia.entities;
 
+import com.cooksys.socialmedia.utils.interfaces.Deletable;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -12,7 +13,7 @@ import java.util.List;
 @Table(name = "\"user\"")
 @NoArgsConstructor
 @Data
-public class User {
+public class User implements Deletable {
 
     @Id
     @GeneratedValue
