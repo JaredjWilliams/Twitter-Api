@@ -15,12 +15,8 @@ import com.cooksys.socialmedia.services.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-
-import java.util.ArrayList;
-import java.util.Iterator;
-
 import java.util.Comparator;
-
+import java.util.Iterator;
 import java.util.List;
 
 @Service
@@ -88,6 +84,11 @@ public class UserServiceImpl implements UserService {
         return userMapper.entityToResponseDto(userRepository.save(user));
     }
 
+    @Override
+    public List<UserResponseDto> getFollowers(String username) {
+        return userMapper.entitiesToResponseDtos(userRepository.findByFollowingCredentialsUsernameAndDeletedFalse(username));
+    }
+
 
     @Override
     public List<TweetResponseDto> getUserMentions(String username) {
@@ -117,6 +118,8 @@ public class UserServiceImpl implements UserService {
 
         return userMapper.entityToResponseDto(user);
     }
+
+
 
     private List<Tweet> buildSortedUserMentions(List<Tweet> tweets) {
         return tweets.stream().filter(tweet -> !tweet.getDeleted()).sorted(

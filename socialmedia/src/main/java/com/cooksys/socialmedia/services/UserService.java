@@ -20,4 +20,5 @@ public interface UserService {
 
     UserResponseDto deleteUser(String username);
 
+    List<UserResponseDto> getFollowers(String username);
 }
