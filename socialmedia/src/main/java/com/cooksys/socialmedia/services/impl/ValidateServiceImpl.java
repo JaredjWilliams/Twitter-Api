@@ -17,14 +17,6 @@ public class ValidateServiceImpl implements ValidateService {
 
     @Override
     public boolean usernameIsAvailable(String username) {
-        List<User> curUsers = userRepository.findAll();
-        Boolean ret = true;
-        for (User u : curUsers){
-            if (u.getCredentials().getUsername().equals(username)){
-                ret = false;
-                break;
-            }
-        }
-        return ret;
+        return userRepository.findByCredentialsUsername(username) == null;
     }
 }
