@@ -93,9 +93,20 @@ public class UserServiceImpl implements UserService {
         return userMapper.entityToResponseDto(user);
     }
 
+    private void validateUser(User user) {
+        if (user == null) {
+            throw new NotFoundException("User not found");
+        }
+
+        if (user.getDeleted()) {
+            throw new BadRequestException("User has been deleted");
+        }
+    }
+
     @Override
     public List<UserResponseDto> getFollowing(String username) {
         User user = userRepository.findByCredentialsUsername(username);
+        validateUser(user);
         List<User> followingUsers = user.getFollowing();
         Iterator<User> iterator = followingUsers.iterator();
         while(iterator.hasNext()){
