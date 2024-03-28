@@ -7,7 +7,6 @@ import com.cooksys.socialmedia.dtos.user.UserResponseDto;
 import com.cooksys.socialmedia.entities.User;
 import com.cooksys.socialmedia.exceptions.BadRequestException;
 import com.cooksys.socialmedia.exceptions.NotFoundException;
-import com.cooksys.socialmedia.mappers.CredentialsMapper;
 import com.cooksys.socialmedia.mappers.TweetMapper;
 import com.cooksys.socialmedia.mappers.UserMapper;
 import com.cooksys.socialmedia.repositories.UserRepository;
@@ -56,29 +55,26 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<TweetResponseDto> getTweetsFromUser(String username) {
         User user = userRepository.findByCredentialsUsername(username);
-
-        if (user == null) {
-            throw new BadRequestException("User not found with username: " + username);
-        }
-
-        if (user.getDeleted()) {
-            throw new BadRequestException("User has been deleted");
-        }
-
+        validateUser(user);
         return tweetMapper.entitiesToResponseDtos(user.getTweets());
     }
 
     @Override
     public UserResponseDto deleteUser(String username) {
-        return null;
+        User user = userRepository.findByCredentialsUsername(username);
+        validateUser(user);
+        user.setDeleted(true);
+        return userMapper.entityToResponseDto(userRepository.save(user));
     }
 
-    private boolean isUserCreatedAndNotDeleted(User user) {
-        return user != null && !user.getDeleted();
-    }
+    private void validateUser(User user) {
+        if (user == null) {
+            throw new NotFoundException("User not found");
+        }
 
-    private boolean isUserDeleted(User user) {
-        return user != null && user.getDeleted();
+        if (user.getDeleted()) {
+            throw new BadRequestException("User is deleted");
+        }
     }
 
     @Override
@@ -87,13 +83,21 @@ public class UserServiceImpl implements UserService {
 
         if (user == null) {
             throw new NotFoundException("User not found with username: " + username);
-        } 
+        }
 
         else if (isUserDeleted(user)) {
             throw new BadRequestException("User: " + username + " is deleted");
         }
 
         return userMapper.entityToResponseDto(user);
+    }
+
+    private boolean isUserCreatedAndNotDeleted(User user) {
+        return user != null && !user.getDeleted();
+    }
+
+    private boolean isUserDeleted(User user) {
+        return user != null && user.getDeleted();
     }
 
 }
