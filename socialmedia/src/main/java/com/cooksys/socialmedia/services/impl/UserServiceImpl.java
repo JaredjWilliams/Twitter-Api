@@ -55,19 +55,6 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<TweetResponseDto> getTweetsFromUser(String username) {
         User user = userRepository.findByCredentialsUsername(username);
-        validateUser(user);
-        return tweetMapper.entitiesToResponseDtos(user.getTweets());
-    }
-
-    @Override
-    public UserResponseDto deleteUser(String username) {
-        User user = userRepository.findByCredentialsUsername(username);
-        validateUser(user);
-        user.setDeleted(true);
-        return userMapper.entityToResponseDto(userRepository.save(user));
-    }
-
-    private void validateUser(User user) {
         if (user == null) {
             throw new NotFoundException("User not found");
         }
@@ -75,6 +62,21 @@ public class UserServiceImpl implements UserService {
         if (user.getDeleted()) {
             throw new BadRequestException("User is deleted");
         }
+        return tweetMapper.entitiesToResponseDtos(user.getTweets());
+    }
+
+    @Override
+    public UserResponseDto deleteUser(String username) {
+        User user = userRepository.findByCredentialsUsername(username);
+        if (user == null) {
+            throw new NotFoundException("User not found");
+        }
+
+        if (user.getDeleted()) {
+            throw new BadRequestException("User is deleted");
+        }
+        user.setDeleted(true);
+        return userMapper.entityToResponseDto(userRepository.save(user));
     }
 
     @Override
