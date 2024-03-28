@@ -192,6 +192,21 @@ public class TweetServiceImpl implements TweetService {
         }
     }
 
+
+    @Override
+    public TweetResponseDto deleteTweet(Long id, CredentialsDto credentialsDto) {
+        Tweet tweetToBeDeleted = getTweet(id);
+        validateTweet(tweetToBeDeleted);
+
+        if (!tweetToBeDeleted.getAuthor().equals(userRepository.findByCredentialsUsername(credentialsDto.getUsername()))){
+            throw new BadRequestException("The specified user does not exist or is not the author of this tweet.");
+        }
+        
+        tweetToBeDeleted.setDeleted(true);
+        tweetRepository.saveAndFlush(tweetToBeDeleted);
+        return tweetMapper.entityToResponseDto(tweetToBeDeleted);
+    }
+
     private void validateTweet(TweetRequestDto tweetRequestDto) {
         if (tweetRequestDto.getContent().isBlank()) {
             throw new BadRequestException("Tweet content cannot be blank");

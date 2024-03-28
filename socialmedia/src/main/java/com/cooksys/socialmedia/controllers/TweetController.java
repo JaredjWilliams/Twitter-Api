@@ -44,16 +44,19 @@ public class TweetController {
     }
 
     @GetMapping
+    @ResponseStatus(HttpStatus.OK)
     public List<TweetResponseDto> getTweets(){
         return tweetService.getTweets();
     }
 
     @GetMapping("/{id}/mentions")
+    @ResponseStatus(HttpStatus.OK)
     public List<UserResponseDto> getMentions(@PathVariable("id") Long id){
         return tweetService.getMentions(id);
     }
 
     @GetMapping("/{id}/replies")
+    @ResponseStatus(HttpStatus.OK)
     public List<TweetResponseDto> getTweetReplies(@PathVariable("id") Long id) {
         return tweetService.getTweetReplies(id);
     } 
@@ -63,4 +66,9 @@ public class TweetController {
         return tweetService.postRepostOfTweet(id, credentialsDto);
     }
         
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public TweetResponseDto deleteTweet(@PathVariable("id") Long id, @RequestBody CredentialsDto credentialsDto){
+        return tweetService.deleteTweet(id , credentialsDto);
+    }
 }
