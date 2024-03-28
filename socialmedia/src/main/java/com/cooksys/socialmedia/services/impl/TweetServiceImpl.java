@@ -195,7 +195,6 @@ public class TweetServiceImpl implements TweetService {
     }
 
     private void validateCredentials(User user, CredentialsDto credentialsDto) {
-
         if (!user.getCredentials().getPassword().equals(credentialsDto.getPassword())){
             throw new NotAuthorizedException("Incorrect password for user: " + credentialsDto.getUsername());
         }
@@ -207,6 +206,7 @@ public class TweetServiceImpl implements TweetService {
         validateTweet(tweet);
 
         User user = getUser(credentialsDto.getUsername());
+        validateCredentials(user, credentialsDto);
 
         List<User> userLikes = tweet.getUserLikes();
         userLikes.add(user);
