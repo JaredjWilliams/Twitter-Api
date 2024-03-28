@@ -145,7 +145,7 @@ public class TweetServiceImpl implements TweetService {
                     tweets.add(tweet);
                     userMentioned.setTweetMentions(tweets);
                     usersMentioned.add(userMentioned);
-                    // userRepository.saveAndFlush(userMentioned);
+                    userRepository.saveAndFlush(userMentioned);
                 }
             }
         }
