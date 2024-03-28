@@ -4,7 +4,6 @@ package com.cooksys.socialmedia.controllers;
 import com.cooksys.socialmedia.dtos.tweet.TweetResponseDto;
 import com.cooksys.socialmedia.dtos.user.UserRequestDto;
 import com.cooksys.socialmedia.dtos.user.UserResponseDto;
-import com.cooksys.socialmedia.entities.User;
 import com.cooksys.socialmedia.services.TweetService;
 import com.cooksys.socialmedia.services.UserService;
 import lombok.RequiredArgsConstructor;
@@ -51,10 +50,16 @@ public class UserController {
         return userService.createUser(userRequestDto);
     }
 
+
     @GetMapping("/@{username}/following")
     @ResponseStatus(HttpStatus.OK)
     public List<UserResponseDto> getFollowing(@PathVariable("username") String username){
         return userService.getFollowing(username);
     }
 
+    @DeleteMapping("/@{username}")
+    @ResponseStatus(HttpStatus.OK)
+    public UserResponseDto deleteUser(@PathVariable("username") String username) {
+        return userService.deleteUser(username);
+    }
 }

@@ -13,9 +13,14 @@ import com.cooksys.socialmedia.dtos.user.UserResponseDto;
 public interface TweetService {
 
     List<TweetResponseDto> getTweetsFromUserAndFollowers(String username);
+
     //ContextDto getContext(TweetRequestDto tweetRequestDto);
 
     List<UserResponseDto> getMentions(Long id);
 
     List<TweetResponseDto> getTweets();
+
+
+    List<TweetResponseDto> getTweetReplies(Long id);
+
 }
