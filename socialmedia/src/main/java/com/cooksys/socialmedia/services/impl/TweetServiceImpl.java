@@ -2,33 +2,27 @@ package com.cooksys.socialmedia.services.impl;
 
 import com.cooksys.socialmedia.dtos.tweet.TweetRequestDto;
 import com.cooksys.socialmedia.dtos.tweet.TweetResponseDto;
-import com.cooksys.socialmedia.entities.Hashtag;
-
 import com.cooksys.socialmedia.dtos.user.UserResponseDto;
+import com.cooksys.socialmedia.entities.Hashtag;
 import com.cooksys.socialmedia.entities.Tweet;
 import com.cooksys.socialmedia.entities.User;
 import com.cooksys.socialmedia.exceptions.BadRequestException;
 import com.cooksys.socialmedia.exceptions.NotFoundException;
-import com.cooksys.socialmedia.mappers.HashtagMapper;
 import com.cooksys.socialmedia.mappers.TweetMapper;
-import com.cooksys.socialmedia.repositories.HashtagRepository;
 import com.cooksys.socialmedia.mappers.UserMapper;
-
-
+import com.cooksys.socialmedia.repositories.HashtagRepository;
 import com.cooksys.socialmedia.repositories.TweetRepository;
 import com.cooksys.socialmedia.repositories.UserRepository;
 import com.cooksys.socialmedia.services.TweetService;
+import com.cooksys.socialmedia.utils.Filter;
+import com.cooksys.socialmedia.utils.Process;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
 
 
@@ -40,7 +34,6 @@ public class TweetServiceImpl implements TweetService {
     private final HashtagRepository hashtagRepository;
     private final TweetRepository tweetRepository;
     private final UserRepository userRepository;
-    private final HashtagMapper hashtagMapper;
     private final TweetMapper tweetMapper;
     private final UserMapper userMapper;
 
@@ -69,74 +62,38 @@ public class TweetServiceImpl implements TweetService {
     @Override
     public TweetResponseDto replyToTweet(Long id, TweetRequestDto tweetRequestDto) {
         Tweet tweet = getTweet(id);
+
         validateTweet(tweet);
+        validateUsername(tweetRequestDto.getCredentialsDto().getUsername());
+        validateTweet(tweetRequestDto);
 
-        if (!isUsernameValid(tweetRequestDto.getCredentialsDto().getUsername())) {
-            throw new NotFoundException("Username not found");
-        }
-
-        if (tweetRequestDto.getContent().isBlank()) {
-            throw new BadRequestException("Tweet content cannot be blank");
-        }
         Tweet newTweet = tweetMapper.requestDtoToEntity(tweetRequestDto);
 
         newTweet.setAuthor(getUser(tweetRequestDto.getCredentialsDto().getUsername()));
         newTweet.setInReplyTo(tweet);
+        newTweet.setUserMentions(createUserMentions(newTweet));
+
+        tweetRepository.saveAndFlush(newTweet);
+
         tweet.getReplies().add(newTweet);
+        tweetRepository.saveAndFlush(tweet);
 
+        saveHashtags(newTweet);
 
-        return null;
+        return tweetMapper.entityToResponseDto(tweetRepository.save(newTweet));
     }
-
-    private void processTweet(Tweet tweet) {
-
-    }
-
-    private void processMentions(Tweet tweet) {
-        Pattern pattern = Pattern.compile("@([a-zA-Z])");
-        Matcher matcher = pattern.matcher(tweet.getContent());
-
-        while (matcher.find()) {
-            String usernameMentioned = matcher.group(1);
-            if (userRepository.existsByCredentialsUsername(usernameMentioned)) {
-                User user = userRepository.findByCredentialsUsername(usernameMentioned);
-                tweet.getUserMentions().add(user);
-            }
-        }
-    }
-
-    private void processHashtags(Tweet tweet) {
-        Pattern pattern = Pattern.compile("#([a-zA-Z])");
-        Matcher matcher = pattern.matcher(tweet.getContent());
-
-        while (matcher.find()) {
-            String label = matcher.group(0);
-            Hashtag hashtag = hashtagRepository.findByLabel(label);
-            if (hashtag != null) {
-                hashtag.getTweets().add(tweet);
-                hashtagRepository.save(hashtag);
-            } else {
-                hashtag = hashtagMapper.
-            }
-        }
-    }
-
 
     public List<UserResponseDto> getUsersFromTweetLikes(Long id) {
         Tweet tweet = getTweet(id);
         validateTweet(tweet);
-        return userMapper.entitiesToResponseDtos(tweet.getUserLikes().stream()
-                .filter(user -> !user.getDeleted())
-                .toList());
+        return userMapper.entitiesToResponseDtos(Filter.byNotDeleted(tweet.getUserLikes()));
     }
 
     @Override
     public List<TweetResponseDto> getTweetResposts(Long id) {
         Tweet tweet = getTweet(id);
         validateTweet(tweet);
-        return tweetMapper.entitiesToResponseDtos(tweet.getReposts().stream()
-                .filter(t -> !t.getDeleted())
-                .toList());
+        return tweetMapper.entitiesToResponseDtos(Filter.byNotDeleted(tweet.getReposts()));
     }
 
     /*@Override
@@ -170,6 +127,33 @@ public class TweetServiceImpl implements TweetService {
         return tweetMapper.entitiesToResponseDtos(tweet.getReplies());
     }
 
+    private List<User> createUserMentions(Tweet tweet) {
+        List<User> users = new ArrayList<>();
+
+        Process.forUsers(tweet).forEach(mention -> {
+            if (userRepository.existsByCredentialsUsername(mention)) {
+                User user = userRepository.findByCredentialsUsername(mention);
+                users.add(user);
+            }});
+        
+        return users;
+    }
+
+    private void saveHashtags(Tweet tweet) {
+        Process.forHashtags(tweet).forEach(hashtag -> {
+            Hashtag tag = hashtagRepository.findByLabel(hashtag);
+            if (tag != null) {
+                tag.getTweets().add(tweet);
+            } else {
+                tag = new Hashtag();
+                tag.setLabel(hashtag);
+                tag.setTweets(List.of(tweet));
+            }
+
+            hashtagRepository.save(tag);
+        });
+    }
+
     public User getUser(String username) {
         User user = userRepository.findByCredentialsUsername(username);
         if (user == null) {
@@ -194,8 +178,16 @@ public class TweetServiceImpl implements TweetService {
         }
     }
 
-    private boolean isUsernameValid(String username) {
-        return userRepository.existsByCredentialsUsername(username);
+    private void validateTweet(TweetRequestDto tweetRequestDto) {
+        if (tweetRequestDto.getContent().isBlank()) {
+            throw new BadRequestException("Tweet content cannot be blank");
+        }
+    }
+
+    private void validateUsername(String username) {
+        if (!userRepository.existsByCredentialsUsername(username)) {
+            throw new NotFoundException("Username not found");
+        }
     }
 
 }

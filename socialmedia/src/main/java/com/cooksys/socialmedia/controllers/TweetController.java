@@ -3,7 +3,6 @@ package com.cooksys.socialmedia.controllers;
 
 import com.cooksys.socialmedia.dtos.tweet.TweetRequestDto;
 import com.cooksys.socialmedia.dtos.tweet.TweetResponseDto;
-import com.cooksys.socialmedia.dtos.tweet.TweetResponseDto;
 import com.cooksys.socialmedia.dtos.user.UserResponseDto;
 import com.cooksys.socialmedia.services.TweetService;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +20,7 @@ public class TweetController {
 
     @PostMapping("/{id}/reply")
     @ResponseStatus(HttpStatus.CREATED)
-    public TweetResponseDto replyToTweet(@PathVariable Long id, @RequestBody TweetRequestDto tweetRequestDto) {
+    public TweetResponseDto replyToTweet(@PathVariable("id") Long id, @RequestBody TweetRequestDto tweetRequestDto) {
         return tweetService.replyToTweet(id, tweetRequestDto);
     }
 
