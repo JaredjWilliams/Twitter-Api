@@ -5,10 +5,27 @@ import com.cooksys.socialmedia.entities.Tweet;
 import com.cooksys.socialmedia.entities.User;
 import com.cooksys.socialmedia.exceptions.NotFoundException;
 import com.cooksys.socialmedia.mappers.TweetMapper;
+
+import com.cooksys.socialmedia.dtos.ContextDto;
+import com.cooksys.socialmedia.dtos.tweet.TweetRequestDto;
+import com.cooksys.socialmedia.dtos.tweet.TweetResponseDto;
+import com.cooksys.socialmedia.dtos.user.UserResponseDto;
+import com.cooksys.socialmedia.entities.Tweet;
+import com.cooksys.socialmedia.entities.User;
+import com.cooksys.socialmedia.exceptions.NotFoundException;
+import com.cooksys.socialmedia.mappers.TweetMapper;
+import com.cooksys.socialmedia.mappers.UserMapper;
+
 import com.cooksys.socialmedia.repositories.TweetRepository;
 import com.cooksys.socialmedia.repositories.UserRepository;
 import com.cooksys.socialmedia.services.TweetService;
 import lombok.RequiredArgsConstructor;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -71,8 +88,42 @@ public class TweetServiceImpl implements TweetService {
         return tweets;
     }
 
+    private final TweetRepository tweetRepository;
+    private final UserMapper userMapper;
+
+    /*@Override
+    public ContextDto getContext(TweetRequestDto tweetDto) {
+        Tweet tweet = tweetMapper.requestDtoToEntity(tweetDto);
+        if (!isTweetDeleted(tweet)){
+            ContextDto contextDto 
+        }
+        throw new NotFoundException("This tweet has been deleted");
+    }
+    public boolean isTweetDeleted(tweet){
+        return tweet != null && tweet.getDeleted();
+    }*/
+    
+
+    @Override
+    public List<UserResponseDto> getMentions(Long id) {
+
+        Tweet tweet = tweetRepository.getReferenceById(id);
+
+        if (tweet == null || tweet.getDeleted()) {
+            throw new NotFoundException("Tweet not found with id: " + id);
+        }
+
+        return userMapper.entitiesToResponseDtos(tweet.getUserMentions());
+    }
+
+    @Override
+    public List<TweetResponseDto> getTweets() {
+        return tweetMapper.entitiesToResponseDtos(tweetRepository.findByDeletedFalseOrderByPostedDesc());
+
+
     @Override
     public List<TweetResponseDto> getTweetReplies(Long id) {
         return tweetMapper.entitiesToResponseDtos(getTweetById(id).getReplies());
+
     }
 }
