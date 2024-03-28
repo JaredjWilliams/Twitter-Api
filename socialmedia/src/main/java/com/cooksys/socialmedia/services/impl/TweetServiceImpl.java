@@ -83,14 +83,6 @@ public class TweetServiceImpl implements TweetService {
         throw new NotFoundException("This tweet has been deleted");
     }*/
 
-    public boolean isTweetDeleted(Tweet tweet){
-        return tweet != null && tweet.getDeleted();
-    }
-
-    private boolean isTweetCreatedAndNotDeleted(Tweet tweet) {
-        return tweet != null && !tweet.getDeleted();
-    }
-
     @Override
     public List<UserResponseDto> getMentions(Long id) {
 
