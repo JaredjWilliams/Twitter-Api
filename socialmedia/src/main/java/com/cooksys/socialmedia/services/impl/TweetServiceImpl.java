@@ -1,25 +1,29 @@
 package com.cooksys.socialmedia.services.impl;
 
 import com.cooksys.socialmedia.dtos.tweet.TweetResponseDto;
+import com.cooksys.socialmedia.dtos.user.UserResponseDto;
+import com.cooksys.socialmedia.entities.Tweet;
 import com.cooksys.socialmedia.entities.User;
+import com.cooksys.socialmedia.exceptions.BadRequestException;
 import com.cooksys.socialmedia.exceptions.NotFoundException;
 import com.cooksys.socialmedia.mappers.TweetMapper;
+import com.cooksys.socialmedia.mappers.UserMapper;
+import com.cooksys.socialmedia.repositories.TweetRepository;
 import com.cooksys.socialmedia.repositories.UserRepository;
 import com.cooksys.socialmedia.services.TweetService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
 public class TweetServiceImpl implements TweetService {
 
+    private final TweetRepository tweetRepository;
     private final UserRepository userRepository;
     private final TweetMapper tweetMapper;
+    private final UserMapper userMapper;
 
     public User getUser(String username) {
 
@@ -55,4 +59,29 @@ public class TweetServiceImpl implements TweetService {
 
         return tweets;
     }
+
+    @Override
+    public List<UserResponseDto> getUsersFromTweetLikes(Long id) {
+        Tweet tweet = getTweet(id);
+        validateTweet(tweet);
+        return userMapper.entitiesToResponseDtos(tweet.getUserLikes().stream().filter(user -> !user.getDeleted()).toList());
+    }
+
+    private Tweet getTweet(Long id) {
+        Optional<Tweet> tweet = tweetRepository.findById(id);
+
+        if (tweet.isEmpty()) {
+            throw new BadRequestException("Tweet is not found");
+        }
+
+        return tweet.get();
+    }
+
+    private void validateTweet(Tweet tweet) {
+        if (tweet.getDeleted()) {
+            throw new NotFoundException("Tweet has been deleted");
+        }
+    }
+
+
 }
