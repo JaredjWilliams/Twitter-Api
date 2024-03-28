@@ -15,6 +15,4 @@ public interface UserService {
     List<TweetResponseDto> getTweetsFromUser(String username);
 
     UserResponseDto deleteUser(String username);
-
-    List<TweetResponseDto> getUserMentions(String username);
 }
