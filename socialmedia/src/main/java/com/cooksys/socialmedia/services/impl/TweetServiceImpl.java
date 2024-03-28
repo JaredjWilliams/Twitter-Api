@@ -102,17 +102,17 @@ public class TweetServiceImpl implements TweetService {
         return tweetMapper.entitiesToResponseDtos(Filter.byNotDeleted(tweet.getReposts()));
     }
 
-    /*@Override
+    @Override
     public ContextDto getContext(TweetRequestDto tweetDto) {
         Tweet tweet = tweetMapper.requestDtoToEntity(tweetDto);
         if (!isTweetDeleted(tweet)){
-            ContextDto contextDto 
+            
         }
         throw new NotFoundException("This tweet has been deleted");
     }
-    public boolean isTweetDeleted(tweet){
+    public boolean isTweetDeleted(Tweet tweet){
         return tweet != null && tweet.getDeleted();
-    }*/
+    }
 
     @Override
     public List<UserResponseDto> getMentions(Long id) {
