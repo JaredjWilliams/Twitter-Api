@@ -23,7 +23,6 @@ import java.util.List;
 public class UserServiceImpl implements UserService {
     
     private final UserRepository userRepository;
-
     private final TweetMapper tweetMapper;
     private final UserMapper userMapper;
 
@@ -85,6 +84,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserResponseDto> getFollowers(String username) {
+        validateUser(userRepository.findByCredentialsUsername(username));
         return userMapper.entitiesToResponseDtos(userRepository.findByFollowingCredentialsUsernameAndDeletedFalse(username));
     }
 
