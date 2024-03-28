@@ -27,6 +27,11 @@ public class UserController {
         return userService.getUsers();
     }
 
+    @GetMapping("/@{username}")
+    public UserResponseDto getUser(@PathVariable("username") String username) {
+        return userService.getUser(username);
+    }
+
     @GetMapping("/@{username}/feed")
     @ResponseStatus(HttpStatus.OK)
     public List<TweetResponseDto> getTweetsFromUserAndFollowers(@PathVariable("username") String username) {
@@ -43,5 +48,11 @@ public class UserController {
     @ResponseStatus(HttpStatus.CREATED)
     public UserResponseDto createUser(@RequestBody UserRequestDto userRequestDto) {
         return userService.createUser(userRequestDto);
+    }
+
+    @DeleteMapping("/@{username}")
+    @ResponseStatus(HttpStatus.OK)
+    public UserResponseDto deleteUser(@PathVariable("username") String username) {
+        return userService.deleteUser(username);
     }
 }

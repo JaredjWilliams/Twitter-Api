@@ -11,5 +11,8 @@ public interface UserService {
 
     UserResponseDto createUser(UserRequestDto userCreationRequestDto);
 
+    UserResponseDto getUser(String username);
     List<TweetResponseDto> getTweetsFromUser(String username);
+
+    UserResponseDto deleteUser(String username);
 }

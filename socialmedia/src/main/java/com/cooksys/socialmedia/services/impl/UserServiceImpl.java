@@ -4,8 +4,10 @@ import com.cooksys.socialmedia.dtos.CredentialsDto;
 import com.cooksys.socialmedia.dtos.tweet.TweetResponseDto;
 import com.cooksys.socialmedia.dtos.user.UserRequestDto;
 import com.cooksys.socialmedia.dtos.user.UserResponseDto;
+import com.cooksys.socialmedia.entities.Tweet;
 import com.cooksys.socialmedia.entities.User;
 import com.cooksys.socialmedia.exceptions.BadRequestException;
+import com.cooksys.socialmedia.exceptions.NotFoundException;
 import com.cooksys.socialmedia.mappers.TweetMapper;
 import com.cooksys.socialmedia.mappers.UserMapper;
 import com.cooksys.socialmedia.repositories.UserRepository;
@@ -13,6 +15,7 @@ import com.cooksys.socialmedia.services.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -54,16 +57,45 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<TweetResponseDto> getTweetsFromUser(String username) {
         User user = userRepository.findByCredentialsUsername(username);
-
         if (user == null) {
-            throw new BadRequestException("User not found with username: " + username);
+            throw new NotFoundException("User not found");
         }
 
         if (user.getDeleted()) {
-            throw new BadRequestException("User has been deleted");
+            throw new BadRequestException("User is deleted");
+        }
+        return tweetMapper.entitiesToResponseDtos(user.getTweets());
+    }
+
+
+
+    @Override
+    public UserResponseDto deleteUser(String username) {
+        User user = userRepository.findByCredentialsUsername(username);
+        if (user == null) {
+            throw new NotFoundException("User not found");
         }
 
-        return tweetMapper.entitiesToResponseDtos(user.getTweets());
+        if (user.getDeleted()) {
+            throw new BadRequestException("User is deleted");
+        }
+        user.setDeleted(true);
+        return userMapper.entityToResponseDto(userRepository.save(user));
+    }
+
+    @Override
+    public UserResponseDto getUser(String username) {
+        User user = userRepository.findByCredentialsUsername(username);
+
+        if (user == null) {
+            throw new NotFoundException("User not found with username: " + username);
+        }
+
+        else if (isUserDeleted(user)) {
+            throw new BadRequestException("User: " + username + " is deleted");
+        }
+
+        return userMapper.entityToResponseDto(user);
     }
 
     private boolean isUserCreatedAndNotDeleted(User user) {
@@ -73,6 +105,5 @@ public class UserServiceImpl implements UserService {
     private boolean isUserDeleted(User user) {
         return user != null && user.getDeleted();
     }
-
 
 }
