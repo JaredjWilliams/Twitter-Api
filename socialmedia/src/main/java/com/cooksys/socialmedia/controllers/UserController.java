@@ -56,6 +56,13 @@ public class UserController {
         return userService.createUser(userRequestDto);
     }
 
+
+    @GetMapping("/@{username}/following")
+    @ResponseStatus(HttpStatus.OK)
+    public List<UserResponseDto> getFollowing(@PathVariable("username") String username){
+        return userService.getFollowing(username);
+    }
+
     @DeleteMapping("/@{username}")
     @ResponseStatus(HttpStatus.OK)
     public UserResponseDto deleteUser(@PathVariable("username") String username) {

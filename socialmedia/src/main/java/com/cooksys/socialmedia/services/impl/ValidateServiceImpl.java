@@ -13,7 +13,13 @@ public class ValidateServiceImpl implements ValidateService {
 
 
     @Override
+    public boolean usernameIsAvailable(String username) {
+        return userRepository.findByCredentialsUsername(username) == null;
+    }
+
+    @Override
     public boolean doesUsernameExist(String username) {
         return userRepository.findByCredentialsUsername(username) != null;
+
     }
 }

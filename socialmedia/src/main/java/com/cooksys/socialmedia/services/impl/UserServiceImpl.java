@@ -15,7 +15,12 @@ import com.cooksys.socialmedia.services.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+
+import java.util.ArrayList;
+import java.util.Iterator;
+
 import java.util.Comparator;
+
 import java.util.List;
 
 @Service
@@ -118,6 +123,31 @@ public class UserServiceImpl implements UserService {
                 Comparator.comparing(Tweet::getPosted)).toList();
     }
 
+    private void validateUser(User user) {
+        if (user == null) {
+            throw new NotFoundException("User not found");
+        }
+
+        if (user.getDeleted()) {
+            throw new BadRequestException("User has been deleted");
+        }
+    }
+
+    @Override
+    public List<UserResponseDto> getFollowing(String username) {
+        User user = userRepository.findByCredentialsUsername(username);
+        validateUser(user);
+        List<User> followingUsers = user.getFollowing();
+        Iterator<User> iterator = followingUsers.iterator();
+        while(iterator.hasNext()){
+            User u = iterator.next();
+            if (u.getDeleted()) {
+                iterator.remove();
+            }
+        }
+        return userMapper.entitiesToResponseDtos(followingUsers);
+    }
+
     private boolean isUserCreatedAndNotDeleted(User user) {
         return user != null && !user.getDeleted();
     }
@@ -125,4 +155,5 @@ public class UserServiceImpl implements UserService {
     private boolean isUserDeleted(User user) {
         return user != null && user.getDeleted();
     }
+
 }
