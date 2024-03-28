@@ -15,7 +15,12 @@ import com.cooksys.socialmedia.services.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+
+import java.util.ArrayList;
+import java.util.Iterator;
+
 import java.util.Comparator;
+
 import java.util.List;
 
 @Service
@@ -83,19 +88,64 @@ public class UserServiceImpl implements UserService {
         return userMapper.entityToResponseDto(userRepository.save(user));
     }
 
+
+    @Override
+    public List<TweetResponseDto> getUserMentions(String username) {
+        User user = userRepository.findByCredentialsUsername(username);
+        if (user == null) {
+            throw new NotFoundException("User not found");
+        }
+
+        if (user.getDeleted()) {
+            throw new BadRequestException("User is deleted");
+        }
+
+        return tweetMapper.entitiesToResponseDtos(buildSortedUserMentions(user.getTweetMentions()));
+    }
+
     @Override
     public UserResponseDto getUser(String username) {
         User user = userRepository.findByCredentialsUsername(username);
 
         if (user == null) {
             throw new NotFoundException("User not found with username: " + username);
-        }
+        } 
 
         else if (isUserDeleted(user)) {
             throw new BadRequestException("User: " + username + " is deleted");
         }
 
         return userMapper.entityToResponseDto(user);
+    }
+
+    private List<Tweet> buildSortedUserMentions(List<Tweet> tweets) {
+        return tweets.stream().filter(tweet -> !tweet.getDeleted()).sorted(
+                Comparator.comparing(Tweet::getPosted)).toList();
+    }
+
+    private void validateUser(User user) {
+        if (user == null) {
+            throw new NotFoundException("User not found");
+        }
+
+        if (user.getDeleted()) {
+            throw new BadRequestException("User has been deleted");
+        }
+    }
+
+    @Override
+    public List<UserResponseDto> getFollowing(String username) {
+        User user = userRepository.findByCredentialsUsername(username);
+        validateUser(user);
+        List<User> followingUsers = user.getFollowing();
+        Iterator<User> iterator = followingUsers.iterator();
+        while(iterator.hasNext()){
+            User u = iterator.next();
+            if (u.getDeleted()) {
+                iterator.remove();
+            }
+        }
+        return userMapper.entitiesToResponseDtos(followingUsers);
     }
 
     private boolean isUserCreatedAndNotDeleted(User user) {
