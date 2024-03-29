@@ -2,9 +2,6 @@ package com.cooksys.socialmedia.controllers;
 
 
 import com.cooksys.socialmedia.dtos.CredentialsDto;
-
-import com.cooksys.socialmedia.dtos.ProfileDto;
-
 import com.cooksys.socialmedia.dtos.tweet.TweetResponseDto;
 import com.cooksys.socialmedia.dtos.user.UserRequestDto;
 import com.cooksys.socialmedia.dtos.user.UserResponseDto;
@@ -53,6 +50,12 @@ public class UserController {
     public List<TweetResponseDto> getMentions(@PathVariable("username") String username) {
         return userService.getUserMentions(username);
     }
+
+    @GetMapping("/@{username}/followers")
+    @ResponseStatus(HttpStatus.OK)
+    public List<UserResponseDto> getFollowers(@PathVariable("username") String username){
+        return userService.getFollowers(username);
+    }
     
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -74,13 +77,13 @@ public class UserController {
     }
 
     @PatchMapping("/@{username}")
-    public UserResponseDto updateUser(@PathVariable("username") String username, @RequestBody UserRequestDto userRequestDto){
+    public UserResponseDto updateUser(@PathVariable("username") String username, @RequestBody UserRequestDto userRequestDto) {
         return userService.updateUser(username, userRequestDto);
+    }
 
     @PostMapping("/@{username}/unfollow")
     @ResponseStatus(HttpStatus.OK)
-    public void unfollowUser(@PathVariable("username") String username, @RequestBody CredentialsDto credentialsDto){
+    public void unfollowUser(@PathVariable("username") String username, @RequestBody CredentialsDto credentialsDto) {
         userService.unfollowUser(username, credentialsDto);
-
     }
 }
