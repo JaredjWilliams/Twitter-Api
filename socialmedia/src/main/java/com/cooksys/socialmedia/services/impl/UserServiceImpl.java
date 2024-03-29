@@ -163,6 +163,7 @@ public class UserServiceImpl implements UserService {
             return userMapper.entityToResponseDto(curUser);
         }
         throw new BadRequestException("The user's username or password doesn't match the user's given in the request body.");
+    }
 
     public void unfollowUser(String username, CredentialsDto credentialsDto) {
         User userUnfollowing = userRepository.findByCredentialsUsername(username);

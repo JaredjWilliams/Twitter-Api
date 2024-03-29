@@ -4,6 +4,7 @@ package com.cooksys.socialmedia.services.impl;
 import com.cooksys.socialmedia.dtos.ContextDto;
 
 import com.cooksys.socialmedia.dtos.CredentialsDto;
+import com.cooksys.socialmedia.dtos.HashtagDto;
 import com.cooksys.socialmedia.dtos.tweet.TweetRequestDto;
 import com.cooksys.socialmedia.dtos.tweet.TweetResponseDto;
 import com.cooksys.socialmedia.dtos.user.UserResponseDto;
@@ -13,6 +14,7 @@ import com.cooksys.socialmedia.entities.User;
 import com.cooksys.socialmedia.exceptions.BadRequestException;
 import com.cooksys.socialmedia.exceptions.NotAuthorizedException;
 import com.cooksys.socialmedia.exceptions.NotFoundException;
+import com.cooksys.socialmedia.mappers.HashtagMapper;
 import com.cooksys.socialmedia.mappers.TweetMapper;
 import com.cooksys.socialmedia.mappers.UserMapper;
 import com.cooksys.socialmedia.repositories.HashtagRepository;
@@ -36,7 +38,7 @@ public class TweetServiceImpl implements TweetService {
     private final UserRepository userRepository;
     private final TweetMapper tweetMapper;
     private final UserMapper userMapper;
-
+    private final HashtagMapper hashtagMapper;
 
     @Override
     public List<TweetResponseDto> getTweetsFromUserAndFollowers(String username) {
@@ -265,6 +267,13 @@ public class TweetServiceImpl implements TweetService {
         }
     }
 
+    private void validateTweet(TweetRequestDto tweetRequestDto) {
+        if (tweetRequestDto.getContent().isBlank()) {
+            throw new BadRequestException("Tweet content cannot be blank");
+        }
+    }
+
+
     private void validateCredentials(User user, CredentialsDto credentialsDto) {
         if (!user.getCredentials().getPassword().equals(credentialsDto.getPassword())){
             throw new NotAuthorizedException("Incorrect password for user: " + credentialsDto.getUsername());
@@ -304,12 +313,6 @@ public class TweetServiceImpl implements TweetService {
         return tweetMapper.entityToResponseDto(tweetToBeDeleted);
     }
 
-    private void validateTweet(TweetRequestDto tweetRequestDto) {
-        if (tweetRequestDto.getContent().isBlank()) {
-            throw new BadRequestException("Tweet content cannot be blank");
-        }
-    }
-
     private void validateUsername(String username) {
         if (!userRepository.existsByCredentialsUsername(username)) {
             throw new NotFoundException("Username not found");
@@ -341,5 +344,13 @@ public class TweetServiceImpl implements TweetService {
         contextDto.setTarget(tweetMapper.entityToResponseDto(tweet));
 
         return contextDto;
+    }
+
+    @Override
+    public List<HashtagDto> getTweetHashtags(Long id) {
+        Tweet tweet = getTweet(id);
+        validateTweet(tweet);
+
+        return hashtagMapper.entitiesToDtos(tweet.getHashtags());
     }
 }

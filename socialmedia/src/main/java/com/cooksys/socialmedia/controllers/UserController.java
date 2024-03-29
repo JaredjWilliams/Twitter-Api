@@ -76,6 +76,7 @@ public class UserController {
     @PatchMapping("/@{username}")
     public UserResponseDto updateUser(@PathVariable("username") String username, @RequestBody UserRequestDto userRequestDto){
         return userService.updateUser(username, userRequestDto);
+    }
 
     @PostMapping("/@{username}/unfollow")
     @ResponseStatus(HttpStatus.OK)
