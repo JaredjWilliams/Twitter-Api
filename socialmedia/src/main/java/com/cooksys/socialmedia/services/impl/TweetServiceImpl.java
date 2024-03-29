@@ -69,12 +69,12 @@ public class TweetServiceImpl implements TweetService {
         Tweet tweet = getTweet(id);
 
         validateTweet(tweet);
-        validateUsername(tweetRequestDto.getCredentialsDto().getUsername());
+        validateUsername(tweetRequestDto.getCredentials().getUsername());
         validateTweet(tweetRequestDto);
 
         Tweet newTweet = tweetMapper.requestDtoToEntity(tweetRequestDto);
 
-        newTweet.setAuthor(getUser(tweetRequestDto.getCredentialsDto().getUsername()));
+        newTweet.setAuthor(getUser(tweetRequestDto.getCredentials().getUsername()));
         newTweet.setInReplyTo(tweet);
         newTweet.setUserMentions(createUserMentions(newTweet));
 
@@ -97,18 +97,18 @@ public class TweetServiceImpl implements TweetService {
     @Override
     public TweetResponseDto createTweet(TweetRequestDto tweetRequestDto) {
 
-        String username = tweetRequestDto.getCredentialsDto().getUsername();
-        String password = tweetRequestDto.getCredentialsDto().getPassword();
+        String username = tweetRequestDto.getCredentials().getUsername();
+        String password = tweetRequestDto.getCredentials().getPassword();
 
         if (tweetRequestDto.getContent() == null || tweetRequestDto.getContent().isEmpty()) {
             throw new BadRequestException("Tweet must have content in request body to be created.");
         }
 
-        if (tweetRequestDto.getCredentialsDto() == null) {
+        if (tweetRequestDto.getCredentials() == null) {
             throw new BadRequestException("Tweet must have credentials in request body to be created.");
         }
 
-        if (userRepository.findByCredentialsUsername(tweetRequestDto.getCredentialsDto().getUsername()) == null) {
+        if (userRepository.findByCredentialsUsername(tweetRequestDto.getCredentials().getUsername()) == null) {
             throw new NotFoundException("User not found with given username: " + username); 
         }
         else if(!userRepository.findByCredentialsUsername(username).getCredentials().getPassword().equals(password)) {

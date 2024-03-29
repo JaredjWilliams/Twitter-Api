@@ -70,6 +70,12 @@ public class UserController {
         return userService.deleteUser(username);
     }
 
+    @PostMapping("/@{username}/follow")
+    @ResponseStatus(HttpStatus.OK)
+    public void followUser(@PathVariable("username") String username, @RequestBody CredentialsDto credentialsDto) {
+        userService.followUser(username, credentialsDto);
+    }
+
     @PostMapping("/@{username}/unfollow")
     @ResponseStatus(HttpStatus.OK)
     public void unfollowUser(@PathVariable("username") String username, @RequestBody CredentialsDto credentialsDto){
