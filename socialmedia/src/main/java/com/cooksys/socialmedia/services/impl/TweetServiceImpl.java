@@ -338,26 +338,25 @@ public class TweetServiceImpl implements TweetService {
     public ContextDto getTweetContext(Long id) {
         Tweet tweet = getTweet(id);
         validateTweet(tweet);
-        
-        //after creation and filling of all replies and reposts
         List<TweetResponseDto> after = new ArrayList<>();
-        after.addAll(tweetMapper.entitiesToResponseDtos(tweet.getReplies()));
-        after.addAll(tweetMapper.entitiesToResponseDtos(tweet.getReposts()));
+        for (Tweet t : tweet.getReplies()){
+            if ((t != null || !isTweetDeleted(t))){
+                after.add(tweetMapper.entityToResponseDto(t));
+            }
+        }
 
-        // before creation
         List<TweetResponseDto> before = new ArrayList<>();
 
-        // before filling of all replies
-        before.add(tweetMapper.entityToResponseDto(tweet.getInReplyTo()));
-        // before filling of all reposts
-        before.add(tweetMapper.entityToResponseDto(tweet.getRepostOf()));
+        if (!isTweetDeleted(tweet.getInReplyTo()) && tweet.getInReplyTo() != null)
+            before.add(tweetMapper.entityToResponseDto(tweet.getInReplyTo()));
 
-        // contextDto creation
+        if (!isTweetDeleted(tweet.getRepostOf()) && tweet.getRepostOf() != null)
+            before.add(tweetMapper.entityToResponseDto(tweet.getRepostOf()));
+
         ContextDto contextDto = new ContextDto();
         contextDto.setAfter(after);
         contextDto.setBefore(before);
         contextDto.setTarget(tweetMapper.entityToResponseDto(tweet));
-
         return contextDto;
     }
 
