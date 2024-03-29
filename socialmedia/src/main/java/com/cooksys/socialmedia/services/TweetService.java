@@ -1,25 +1,19 @@
 package com.cooksys.socialmedia.services;
 
-import com.cooksys.socialmedia.dtos.tweet.TweetRequestDto;
-import com.cooksys.socialmedia.dtos.tweet.TweetResponseDto;
-import com.cooksys.socialmedia.dtos.user.UserResponseDto;
-import com.cooksys.socialmedia.dtos.tweet.TweetResponseDto;
-import com.cooksys.socialmedia.dtos.user.UserResponseDto;
-
-import java.util.List;
-
-import com.cooksys.socialmedia.dtos.CredentialsDto;
 
 import com.cooksys.socialmedia.dtos.ContextDto;
+
+import com.cooksys.socialmedia.dtos.CredentialsDto;
 import com.cooksys.socialmedia.dtos.tweet.TweetRequestDto;
 import com.cooksys.socialmedia.dtos.tweet.TweetResponseDto;
 import com.cooksys.socialmedia.dtos.user.UserResponseDto;
+
 import java.util.List;
+
 
 public interface TweetService {
 
     List<TweetResponseDto> getTweetsFromUserAndFollowers(String username);
-
 
     TweetResponseDto replyToTweet(Long id, TweetRequestDto tweetRequestDto);
 
@@ -27,12 +21,11 @@ public interface TweetService {
 
     List<TweetResponseDto> getTweetResposts(Long id);
 
-    //ContextDto getContext(TweetRequestDto tweetRequestDto);
+    ContextDto getTweetContext(Long id);
 
     List<UserResponseDto> getMentions(Long id);
 
     List<TweetResponseDto> getTweets();
-
 
     List<TweetResponseDto> getTweetReplies(Long id);
 
@@ -40,7 +33,13 @@ public interface TweetService {
 
     TweetResponseDto postRepostOfTweet(Long id, CredentialsDto credentialsDto);
 
-    void createLike (Long id, CredentialsDto credentialsDto);
+    TweetResponseDto createTweet(TweetRequestDto tweetRequestDto);
+
+    void createLike(Long id, CredentialsDto credentialsDto);
+
+    TweetResponseDto getTweetById(Long id);
+
+
 
 
 }
