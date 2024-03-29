@@ -41,13 +41,13 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponseDto createUser(UserRequestDto userRequestDto) {
-        validateProfile(userRequestDto);
+        validatePatchingProfile(userRequestDto);
         User user = getUserByCredentials(userRequestDto.getCredentials());
 
         if (isUserCreatedAndNotDeleted(user)) {
             throw new BadRequestException("User can't be created because the user already exists");
         }
-
+        validateProfile(userRequestDto);
 
 
         if (isUserDeleted(user)) {
@@ -155,17 +155,15 @@ public class UserServiceImpl implements UserService {
         validatePatchingProfile(userRequestDto);
 
         Profile profile = profileMapper.dtoToEntity(userRequestDto.getProfile());
+        System.out.println(profile.getEmail());
+        if (profile.getEmail() != null) {
+            user.getProfile().setEmail(profile.getEmail());
+        }
+        user.getProfile().setPhone(profile.getPhone());
+        user.getProfile().setFirstName(profile.getFirstName());
+        user.getProfile().setLastName(profile.getLastName());
 
-        User userToUpdate = userMapper.requestDtoToEntity(userRequestDto);
-        userToUpdate.setTweets(user.getTweets());
-        userToUpdate.setTweetMentions(user.getTweetMentions());
-        userToUpdate.setFollowing(user.getFollowing());
-        userToUpdate.setFollowers(user.getFollowers());
-        userToUpdate.setTweetLikes(user.getTweetLikes());
-
-        userToUpdate.setCredentials(user.getCredentials());
-        userToUpdate.setProfile(profile);
-        return userMapper.entityToResponseDto(userRepository.saveAndFlush(userToUpdate));
+        return userMapper.entityToResponseDto(userRepository.saveAndFlush(user));
 
     }
 
