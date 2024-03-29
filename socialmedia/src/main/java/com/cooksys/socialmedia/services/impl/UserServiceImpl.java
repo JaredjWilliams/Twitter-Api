@@ -148,20 +148,23 @@ public class UserServiceImpl implements UserService {
 
     public void unfollowUser(String username, CredentialsDto credentialsDto) {
         User userUnfollowing = userRepository.findByCredentialsUsername(username);
-        User currentlyFollowedUser = userRepository.findByCredentialsUsername(credentialsDto.getUsername());
-        validateUser(currentlyFollowedUser);
-        validateUser(userUnfollowing);
+        User user = userRepository.findByCredentialsUsername(credentialsDto.getUsername());
         
+        validateUser(user);
+        validateUser(userUnfollowing);
+
         List<User> userFollowing = userUnfollowing.getFollowing();
 
-        if(!userFollowing.contains(currentlyFollowedUser) || !currentlyFollowedUser.getCredentials().getPassword().equals(credentialsDto.getPassword())){
+        if(!userFollowing.contains(user) || !user.getCredentials().getPassword().equals(credentialsDto.getPassword())){
             throw new BadRequestException("The given user to follow currently isn't followed by the user," + 
             " or the given credentials are invalid");
         }
-        
-        userFollowing.remove(currentlyFollowedUser);
-        userUnfollowing.setFollowing(userFollowing);
+
+        user.getFollowing().remove(userUnfollowing);
+        userUnfollowing.getFollowers().remove(user);
+
         userRepository.saveAndFlush(userUnfollowing);
+        userRepository.saveAndFlush(user);
     }
 
     private void validateUser(User user) {
