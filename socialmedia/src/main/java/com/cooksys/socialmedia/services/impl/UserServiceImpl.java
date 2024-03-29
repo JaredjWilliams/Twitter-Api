@@ -7,6 +7,7 @@ import com.cooksys.socialmedia.dtos.user.UserResponseDto;
 import com.cooksys.socialmedia.entities.Profile;
 import com.cooksys.socialmedia.entities.User;
 import com.cooksys.socialmedia.exceptions.BadRequestException;
+import com.cooksys.socialmedia.exceptions.NotAuthorizedException;
 import com.cooksys.socialmedia.exceptions.NotFoundException;
 import com.cooksys.socialmedia.mappers.CredentialsMapper;
 import com.cooksys.socialmedia.mappers.ProfileMapper;
@@ -94,6 +95,13 @@ public class UserServiceImpl implements UserService {
         return userMapper.entityToResponseDto(user);
     }
 
+
+    private void validateCredentials(User user, CredentialsDto credentialsDto) {
+        if (!user.getCredentials().getPassword().equals(credentialsDto.getPassword())){
+            throw new NotAuthorizedException("Incorrect password for user: " + credentialsDto.getUsername());
+        }
+    }
+
     @Override
     public List<UserResponseDto> getFollowing(String username) {
         User user = userRepository.findByCredentialsUsername(username);
@@ -108,7 +116,6 @@ public class UserServiceImpl implements UserService {
         }
         return userMapper.entitiesToResponseDtos(followingUsers);
     }
-
 
     @Override
     public UserResponseDto updateUser(String username, UserRequestDto userRequestDto) {
@@ -156,8 +163,6 @@ public class UserServiceImpl implements UserService {
         userRepository.saveAndFlush(userUnfollowing);
     }
 
-
-
     private void validateUser(User user) {
         if (user == null) {
             throw new NotFoundException("User not found");
@@ -174,6 +179,36 @@ public class UserServiceImpl implements UserService {
 
     private boolean isUserDeleted(User user) {
         return user != null && user.getDeleted();
+    }
+
+    @Override
+    public void followUser(String username, CredentialsDto credentialsDto) {
+        User subscriber = userRepository.findByCredentialsUsername(credentialsDto.getUsername());
+        User user = userRepository.findByCredentialsUsername(username);
+        validateUser(subscriber);
+        validateUser(user);
+        validateCredentials(subscriber, credentialsDto);
+
+        List<User> followers = user.getFollowers();
+        List<User> following = subscriber.getFollowing();
+
+        if (followers.contains(subscriber) || following.contains(user)) {
+            throw new BadRequestException("User " + subscriber.getCredentials().getUsername() + " is already following " + user.getCredentials().getUsername());
+        } 
+
+        if (user.getCredentials().equals(subscriber.getCredentials())) {
+            throw new BadRequestException("User cannot follow themself");
+        }
+        else {
+            following.add(user);
+            subscriber.setFollowing(following);
+            userRepository.saveAndFlush(subscriber);
+
+            followers.add(subscriber);
+            user.setFollowers(followers);
+            userRepository.saveAndFlush(user);
+        }
+
     }
 
 }

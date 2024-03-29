@@ -26,4 +26,6 @@ public interface UserService {
 
     void unfollowUser(String username, CredentialsDto credentialsDto);
 
+    void followUser(String username, CredentialsDto credentialsDto);
+
 }
