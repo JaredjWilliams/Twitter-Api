@@ -72,6 +72,13 @@ public class TweetServiceImpl implements TweetService {
 
         Tweet replyTweet = createReplyTweet(tweetRequestDto, tweet);
 
+        replyTweet.setAuthor(getUser(tweetRequestDto.getCredentials().getUsername()));
+        replyTweet.setInReplyTo(tweet);
+        replyTweet.setUserMentions(createUserMentions(replyTweet));
+
+        tweetRepository.saveAndFlush(replyTweet);
+
+        tweet.getReplies().add(replyTweet);
         tweet.getReplies().add(replyTweet);
         tweetRepository.saveAndFlush(tweet);
 

@@ -78,7 +78,7 @@ public class TweetController {
     public void createLike(@PathVariable("id") Long id, @RequestBody CredentialsDto credentialsDto){
         tweetService.createLike(id, credentialsDto);
     }   
-        
+
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public TweetResponseDto deleteTweet(@PathVariable("id") Long id, @RequestBody CredentialsDto credentialsDto){
