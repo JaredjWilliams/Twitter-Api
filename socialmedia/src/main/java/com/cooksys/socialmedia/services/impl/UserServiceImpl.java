@@ -9,8 +9,6 @@ import com.cooksys.socialmedia.entities.User;
 import com.cooksys.socialmedia.exceptions.BadRequestException;
 import com.cooksys.socialmedia.exceptions.NotAuthorizedException;
 import com.cooksys.socialmedia.exceptions.NotFoundException;
-import com.cooksys.socialmedia.mappers.CredentialsMapper;
-import com.cooksys.socialmedia.mappers.ProfileMapper;
 import com.cooksys.socialmedia.mappers.TweetMapper;
 import com.cooksys.socialmedia.mappers.UserMapper;
 import com.cooksys.socialmedia.repositories.UserRepository;
@@ -30,8 +28,6 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final TweetMapper tweetMapper;
     private final UserMapper userMapper;
-    private final ProfileMapper profileMapper;
-    private final CredentialsMapper credentialsMapper;
 
     private User getUserByCredentials(CredentialsDto credentialsDto) {
         return userRepository.findByCredentialsUsername(credentialsDto.getUsername());
@@ -147,23 +143,21 @@ public class UserServiceImpl implements UserService {
     }
 
     public void unfollowUser(String username, CredentialsDto credentialsDto) {
-        User userUnfollowing = userRepository.findByCredentialsUsername(username);
+        User userToUnfollow = userRepository.findByCredentialsUsername(username);
         User user = userRepository.findByCredentialsUsername(credentialsDto.getUsername());
         
         validateUser(user);
-        validateUser(userUnfollowing);
+        validateUser(userToUnfollow);
 
-        List<User> userFollowing = userUnfollowing.getFollowing();
-
-        if(!userFollowing.contains(user) || !user.getCredentials().getPassword().equals(credentialsDto.getPassword())){
+        if(!user.getFollowing().contains(userToUnfollow) || !user.getCredentials().getPassword().equals(credentialsDto.getPassword())){
             throw new BadRequestException("The given user to follow currently isn't followed by the user," + 
             " or the given credentials are invalid");
         }
 
-        user.getFollowing().remove(userUnfollowing);
-        userUnfollowing.getFollowers().remove(user);
+        user.getFollowing().remove(userToUnfollow);
+        userToUnfollow.getFollowers().remove(user);
 
-        userRepository.saveAndFlush(userUnfollowing);
+        userRepository.saveAndFlush(userToUnfollow);
         userRepository.saveAndFlush(user);
     }
 
