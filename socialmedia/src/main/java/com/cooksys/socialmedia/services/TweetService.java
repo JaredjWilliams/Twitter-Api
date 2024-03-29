@@ -4,6 +4,7 @@ package com.cooksys.socialmedia.services;
 import com.cooksys.socialmedia.dtos.ContextDto;
 
 import com.cooksys.socialmedia.dtos.CredentialsDto;
+import com.cooksys.socialmedia.dtos.HashtagDto;
 import com.cooksys.socialmedia.dtos.tweet.TweetRequestDto;
 import com.cooksys.socialmedia.dtos.tweet.TweetResponseDto;
 import com.cooksys.socialmedia.dtos.user.UserResponseDto;
@@ -38,6 +39,8 @@ public interface TweetService {
     void createLike(Long id, CredentialsDto credentialsDto);
 
     TweetResponseDto getTweetById(Long id);
+
+    List<HashtagDto> getTweetHashtags(Long id);
 
 
 
