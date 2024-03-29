@@ -1,4 +1,4 @@
-package com.cooksys.socialmedia;
+/*package com.cooksys.socialmedia;
 
 import com.cooksys.socialmedia.entities.*;
 import com.cooksys.socialmedia.repositories.HashtagRepository;
@@ -279,4 +279,4 @@ public class Seeder implements CommandLineRunner {
         userRepository.saveAndFlush(user1);
     }
 
-}
+}*/
