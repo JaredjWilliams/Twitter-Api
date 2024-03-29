@@ -3,6 +3,7 @@ package com.cooksys.socialmedia.controllers;
 
 import com.cooksys.socialmedia.dtos.ContextDto;
 import com.cooksys.socialmedia.dtos.CredentialsDto;
+import com.cooksys.socialmedia.dtos.HashtagDto;
 import com.cooksys.socialmedia.dtos.tweet.TweetRequestDto;
 import com.cooksys.socialmedia.dtos.tweet.TweetResponseDto;
 import com.cooksys.socialmedia.dtos.user.UserResponseDto;
@@ -88,4 +89,10 @@ public class TweetController {
     public ContextDto getTweetContext(@PathVariable("id") Long id){
         return tweetService.getTweetContext(id);
     }
+
+    @GetMapping("/{id}/tags")
+    public List<HashtagDto> getTweetHashtags(@PathVariable("id") Long id){
+        return tweetService.getTweetHashtags(id);
+    }
+
 }
