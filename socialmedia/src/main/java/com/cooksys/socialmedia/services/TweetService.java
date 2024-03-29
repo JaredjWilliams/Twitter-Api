@@ -1,11 +1,13 @@
 package com.cooksys.socialmedia.services;
 
+
+import com.cooksys.socialmedia.dtos.CredentialsDto;
 import com.cooksys.socialmedia.dtos.tweet.TweetRequestDto;
 import com.cooksys.socialmedia.dtos.tweet.TweetResponseDto;
 import com.cooksys.socialmedia.dtos.user.UserResponseDto;
+
 import java.util.List;
 
-import com.cooksys.socialmedia.dtos.CredentialsDto;
 
 public interface TweetService {
 
@@ -32,5 +34,9 @@ public interface TweetService {
     TweetResponseDto createTweet(TweetRequestDto tweetRequestDto);
 
     void createLike(Long id, CredentialsDto credentialsDto);
+
+    TweetResponseDto getTweetById(Long id);
+
+
 
 }
