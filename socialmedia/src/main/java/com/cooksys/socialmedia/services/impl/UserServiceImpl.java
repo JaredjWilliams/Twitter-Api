@@ -8,6 +8,8 @@ import com.cooksys.socialmedia.entities.User;
 import com.cooksys.socialmedia.exceptions.BadRequestException;
 import com.cooksys.socialmedia.exceptions.NotAuthorizedException;
 import com.cooksys.socialmedia.exceptions.NotFoundException;
+import com.cooksys.socialmedia.mappers.CredentialsMapper;
+import com.cooksys.socialmedia.mappers.ProfileMapper;
 import com.cooksys.socialmedia.mappers.TweetMapper;
 import com.cooksys.socialmedia.mappers.UserMapper;
 import com.cooksys.socialmedia.repositories.UserRepository;
@@ -24,9 +26,10 @@ import java.util.List;
 public class UserServiceImpl implements UserService {
     
     private final UserRepository userRepository;
-
     private final TweetMapper tweetMapper;
     private final UserMapper userMapper;
+    private final ProfileMapper profileMapper;
+    private final CredentialsMapper credentialsMapper;
 
     private User getUserByCredentials(CredentialsDto credentialsDto) {
         return userRepository.findByCredentialsUsername(credentialsDto.getUsername());
@@ -53,64 +56,40 @@ public class UserServiceImpl implements UserService {
 
         return userMapper.entityToResponseDto(userRepository.saveAndFlush(userMapper.requestDtoToEntity(userRequestDto)));
     }
-
-
+    
     @Override
     public List<TweetResponseDto> getTweetsFromUser(String username) {
         User user = userRepository.findByCredentialsUsername(username);
-        if (user == null) {
-            throw new NotFoundException("User not found");
-        }
-
-        if (user.getDeleted()) {
-            throw new BadRequestException("User is deleted");
-        }
+        validateUser(user);
         return tweetMapper.entitiesToResponseDtos(user.getTweets());
     }
-
-
 
     @Override
     public UserResponseDto deleteUser(String username) {
         User user = userRepository.findByCredentialsUsername(username);
-        if (user == null) {
-            throw new NotFoundException("User not found");
-        }
-
-        if (user.getDeleted()) {
-            throw new BadRequestException("User is deleted");
-        }
+        validateUser(user);
         user.setDeleted(true);
         return userMapper.entityToResponseDto(userRepository.save(user));
+    }
+
+    @Override
+    public List<UserResponseDto> getFollowers(String username) {
+        validateUser(userRepository.findByCredentialsUsername(username));
+        return userMapper.entitiesToResponseDtos(userRepository.findByFollowingCredentialsUsernameAndDeletedFalse(username));
     }
 
 
     @Override
     public List<TweetResponseDto> getUserMentions(String username) {
         User user = userRepository.findByCredentialsUsername(username);
-        if (user == null) {
-            throw new NotFoundException("User not found");
-        }
-
-        if (user.getDeleted()) {
-            throw new BadRequestException("User is deleted");
-        }
-
+        validateUser(user);
         return tweetMapper.entitiesToResponseDtos(Sort.filterNotDeletedAndSortDesc(user.getTweetMentions()));
     }
 
     @Override
     public UserResponseDto getUser(String username) {
         User user = userRepository.findByCredentialsUsername(username);
-
-        if (user == null) {
-            throw new NotFoundException("User not found with username: " + username);
-        } 
-
-        else if (isUserDeleted(user)) {
-            throw new BadRequestException("User: " + username + " is deleted");
-        }
-
+        validateUser(user);
         return userMapper.entityToResponseDto(user);
     }
 
@@ -153,7 +132,20 @@ public class UserServiceImpl implements UserService {
         return user != null && user.getDeleted();
     }
 
-    @Override
+
+    public UserResponseDto updateUser(String username, UserRequestDto userRequestDto) {
+        User curUser = userRepository.findByCredentialsUsername(username);
+        validateUser(curUser);
+        User updatedUser = userMapper.requestDtoToEntity(userRequestDto);
+        if (curUser.getCredentials().equals(updatedUser.getCredentials())) {
+            curUser.setProfile(updatedUser.getProfile());
+            userRepository.saveAndFlush(curUser);
+
+            return userMapper.entityToResponseDto(curUser);
+        }
+        throw new BadRequestException("The user's username or password doesn't match the user's given in the request body.");
+    }
+
     public void unfollowUser(String username, CredentialsDto credentialsDto) {
         User userUnfollowing = userRepository.findByCredentialsUsername(username);
         User currentlyFollowedUser = userRepository.findByCredentialsUsername(credentialsDto.getUsername());

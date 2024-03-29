@@ -50,6 +50,12 @@ public class UserController {
     public List<TweetResponseDto> getMentions(@PathVariable("username") String username) {
         return userService.getUserMentions(username);
     }
+
+    @GetMapping("/@{username}/followers")
+    @ResponseStatus(HttpStatus.OK)
+    public List<UserResponseDto> getFollowers(@PathVariable("username") String username){
+        return userService.getFollowers(username);
+    }
     
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -75,10 +81,15 @@ public class UserController {
     public void followUser(@PathVariable("username") String username, @RequestBody CredentialsDto credentialsDto) {
         userService.followUser(username, credentialsDto);
     }
+    
+    @PatchMapping("/@{username}")
+    public UserResponseDto updateUser(@PathVariable("username") String username, @RequestBody UserRequestDto userRequestDto) {
+        return userService.updateUser(username, userRequestDto);
+    }
 
     @PostMapping("/@{username}/unfollow")
     @ResponseStatus(HttpStatus.OK)
-    public void unfollowUser(@PathVariable("username") String username, @RequestBody CredentialsDto credentialsDto){
+    public void unfollowUser(@PathVariable("username") String username, @RequestBody CredentialsDto credentialsDto) {
         userService.unfollowUser(username, credentialsDto);
     }
 }
