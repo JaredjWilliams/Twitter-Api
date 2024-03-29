@@ -4,9 +4,11 @@ import com.cooksys.socialmedia.dtos.CredentialsDto;
 import com.cooksys.socialmedia.dtos.tweet.TweetResponseDto;
 import com.cooksys.socialmedia.dtos.user.UserRequestDto;
 import com.cooksys.socialmedia.dtos.user.UserResponseDto;
+import com.cooksys.socialmedia.entities.Profile;
 import com.cooksys.socialmedia.entities.User;
 import com.cooksys.socialmedia.exceptions.BadRequestException;
 import com.cooksys.socialmedia.exceptions.NotFoundException;
+import com.cooksys.socialmedia.mappers.ProfileMapper;
 import com.cooksys.socialmedia.mappers.TweetMapper;
 import com.cooksys.socialmedia.mappers.UserMapper;
 import com.cooksys.socialmedia.repositories.UserRepository;
@@ -23,9 +25,9 @@ import java.util.List;
 public class UserServiceImpl implements UserService {
     
     private final UserRepository userRepository;
-
     private final TweetMapper tweetMapper;
     private final UserMapper userMapper;
+    private final ProfileMapper profileMapper;
 
     private User getUserByCredentials(CredentialsDto credentialsDto) {
         return userRepository.findByCredentialsUsername(credentialsDto.getUsername());
@@ -38,12 +40,14 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponseDto createUser(UserRequestDto userRequestDto) {
-
+        validateProfile(userRequestDto);
         User user = getUserByCredentials(userRequestDto.getCredentials());
 
         if (isUserCreatedAndNotDeleted(user)) {
             throw new BadRequestException("User can't be created because the user already exists");
         }
+
+
 
         if (isUserDeleted(user)) {
             user.setDeleted(false);
@@ -52,7 +56,6 @@ public class UserServiceImpl implements UserService {
 
         return userMapper.entityToResponseDto(userRepository.saveAndFlush(userMapper.requestDtoToEntity(userRequestDto)));
     }
-
 
     @Override
     public List<TweetResponseDto> getTweetsFromUser(String username) {
@@ -66,8 +69,6 @@ public class UserServiceImpl implements UserService {
         }
         return tweetMapper.entitiesToResponseDtos(user.getTweets());
     }
-
-
 
     @Override
     public UserResponseDto deleteUser(String username) {
@@ -113,16 +114,6 @@ public class UserServiceImpl implements UserService {
         return userMapper.entityToResponseDto(user);
     }
 
-    private void validateUser(User user) {
-        if (user == null) {
-            throw new NotFoundException("User not found");
-        }
-
-        if (user.getDeleted()) {
-            throw new BadRequestException("User has been deleted");
-        }
-    }
-
     @Override
     public List<UserResponseDto> getFollowing(String username) {
         User user = userRepository.findByCredentialsUsername(username);
@@ -136,14 +127,6 @@ public class UserServiceImpl implements UserService {
             }
         }
         return userMapper.entitiesToResponseDtos(followingUsers);
-    }
-
-    private boolean isUserCreatedAndNotDeleted(User user) {
-        return user != null && !user.getDeleted();
-    }
-
-    private boolean isUserDeleted(User user) {
-        return user != null && user.getDeleted();
     }
 
     @Override
@@ -164,4 +147,36 @@ public class UserServiceImpl implements UserService {
         userRepository.saveAndFlush(userUnfollowing);
     }
 
+    private void validateUser(User user) {
+        if (user == null) {
+            throw new NotFoundException("User not found");
+        }
+
+        if (user.getDeleted()) {
+            throw new BadRequestException("User has been deleted");
+        }
+    }
+
+    private boolean isUserCreatedAndNotDeleted(User user) {
+        return user != null && !user.getDeleted();
+    }
+
+    private boolean isUserDeleted(User user) {
+        return user != null && user.getDeleted();
+    }
+
+    private void validateProfile(UserRequestDto userRequestDto) {
+        if (userRequestDto == null) throw new BadRequestException("User request is required");
+
+        Profile profile = profileMapper.dtoToEntity(userRequestDto.getProfile());
+        CredentialsDto credentials = userRequestDto.getCredentials();
+
+        if (profile == null) throw new BadRequestException("Profile is required");
+        if ((profile.getEmail() == null)) throw new BadRequestException("Email is required");
+        if (profile.getFirstName() == null) throw new BadRequestException("First name is required");
+        if (profile.getLastName().isBlank()) throw new BadRequestException("Last name is required");
+        if (profile.getPhone().isBlank()) throw new BadRequestException("Phone is required");
+        if (credentials.getPassword() == null) throw new BadRequestException("Password is required");
+        if (credentials.getUsername() == null) throw new BadRequestException("Username is required");
+    }
 }
