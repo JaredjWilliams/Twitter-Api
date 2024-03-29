@@ -87,6 +87,29 @@ public class TweetServiceImpl implements TweetService {
         return tweetMapper.entityToResponseDto(tweetRepository.save(replyTweet));
     }
 
+    @Override
+    public void createLike(Long id, CredentialsDto credentialsDto) {
+        Tweet tweet = getTweet(id);
+        validateTweet(tweet);
+
+        User user = getUser(credentialsDto.getUsername());
+        validateCredentials(user, credentialsDto);
+
+        List<Tweet> tweetLikes = user.getTweetLikes();
+        List<User> userLikes = tweet.getUserLikes();
+
+        if (!user.getTweetLikes().contains(tweet)) {
+            userLikes.add(user);
+            tweetLikes.add(tweet);
+        }
+
+        tweet.setUserLikes(userLikes);
+        user.setTweetLikes(tweetLikes);
+
+        tweetRepository.saveAndFlush(tweet);
+        userRepository.saveAndFlush(user);
+    }
+
     public List<UserResponseDto> getUsersFromTweetLikes(Long id) {
         Tweet tweet = getTweet(id);
         validateTweet(tweet);
@@ -285,25 +308,6 @@ public class TweetServiceImpl implements TweetService {
         if (!user.getCredentials().getPassword().equals(credentialsDto.getPassword())){
             throw new NotAuthorizedException("Incorrect password for user: " + credentialsDto.getUsername());
         }
-    }
-
-    @Override
-    public void createLike(Long id, CredentialsDto credentialsDto) {
-        Tweet tweet = getTweet(id);
-        validateTweet(tweet);
-
-        User user = getUser(credentialsDto.getUsername());
-        validateCredentials(user, credentialsDto);
-
-        List<User> userLikes = tweet.getUserLikes();
-        userLikes.add(user);
-        tweet.setUserLikes(userLikes);
-        tweetRepository.saveAndFlush(tweet);
-
-        List<Tweet> tweetLikes = user.getTweetLikes();
-        tweetLikes.add(tweet);
-        user.setTweetLikes(tweetLikes);
-        userRepository.saveAndFlush(user);
     }
 
     @Override
