@@ -7,6 +7,8 @@ import com.cooksys.socialmedia.dtos.user.UserResponseDto;
 import com.cooksys.socialmedia.entities.User;
 import com.cooksys.socialmedia.exceptions.BadRequestException;
 import com.cooksys.socialmedia.exceptions.NotFoundException;
+import com.cooksys.socialmedia.mappers.CredentialsMapper;
+import com.cooksys.socialmedia.mappers.ProfileMapper;
 import com.cooksys.socialmedia.mappers.TweetMapper;
 import com.cooksys.socialmedia.mappers.UserMapper;
 import com.cooksys.socialmedia.repositories.UserRepository;
@@ -25,6 +27,8 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final TweetMapper tweetMapper;
     private final UserMapper userMapper;
+    private final ProfileMapper profileMapper;
+    private final CredentialsMapper credentialsMapper;
 
     private User getUserByCredentials(CredentialsDto credentialsDto) {
         return userRepository.findByCredentialsUsername(credentialsDto.getUsername());
@@ -119,6 +123,37 @@ public class UserServiceImpl implements UserService {
 
     private boolean isUserDeleted(User user) {
         return user != null && user.getDeleted();
+    }
+
+
+    public UserResponseDto updateUser(String username, UserRequestDto userRequestDto) {
+        User curUser = userRepository.findByCredentialsUsername(username);
+        validateUser(curUser);
+        User updatedUser = userMapper.requestDtoToEntity(userRequestDto);
+        if (curUser.getCredentials().equals(updatedUser.getCredentials())) {
+            curUser.setProfile(updatedUser.getProfile());
+            userRepository.saveAndFlush(curUser);
+
+            return userMapper.entityToResponseDto(curUser);
+        }
+        throw new BadRequestException("The user's username or password doesn't match the user's given in the request body.");
+    }
+
+    public void unfollowUser(String username, CredentialsDto credentialsDto) {
+        User userUnfollowing = userRepository.findByCredentialsUsername(username);
+        User currentlyFollowedUser = userRepository.findByCredentialsUsername(credentialsDto.getUsername());
+        validateUser(currentlyFollowedUser);
+        
+        List<User> userFollowing = userUnfollowing.getFollowing();
+
+        if(!userFollowing.contains(currentlyFollowedUser) || !currentlyFollowedUser.getCredentials().getPassword().equals(credentialsDto.getPassword())){
+            throw new BadRequestException("The given user to follow currently isn't followed by the user," + 
+            " or the given credentials are invalid");
+        }
+        
+        userFollowing.remove(currentlyFollowedUser);
+        userUnfollowing.setFollowing(userFollowing);
+        userRepository.saveAndFlush(userUnfollowing);
     }
 
 }
