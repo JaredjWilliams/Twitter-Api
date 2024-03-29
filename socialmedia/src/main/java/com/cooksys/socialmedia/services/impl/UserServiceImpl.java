@@ -1,6 +1,7 @@
 package com.cooksys.socialmedia.services.impl;
 
 import com.cooksys.socialmedia.dtos.CredentialsDto;
+import com.cooksys.socialmedia.dtos.ProfileDto;
 import com.cooksys.socialmedia.dtos.tweet.TweetResponseDto;
 import com.cooksys.socialmedia.dtos.user.UserRequestDto;
 import com.cooksys.socialmedia.dtos.user.UserResponseDto;
@@ -147,6 +148,28 @@ public class UserServiceImpl implements UserService {
         userRepository.saveAndFlush(userUnfollowing);
     }
 
+    @Override
+    public UserResponseDto updateUser(String username, UserRequestDto userRequestDto) {
+        User user = userRepository.findByCredentialsUsername(username);
+        validateUser(user);
+        validatePatchingProfile(userRequestDto);
+
+        Profile profile = profileMapper.dtoToEntity(userRequestDto.getProfile());
+
+        User userToUpdate = userMapper.requestDtoToEntity(userRequestDto);
+        userToUpdate.setTweets(user.getTweets());
+        userToUpdate.setTweetMentions(user.getTweetMentions());
+        userToUpdate.setFollowing(user.getFollowing());
+        userToUpdate.setFollowers(user.getFollowers());
+        userToUpdate.setTweetLikes(user.getTweetLikes());
+
+        userToUpdate.setCredentials(user.getCredentials());
+        userToUpdate.setProfile(profile);
+        return userMapper.entityToResponseDto(userRepository.saveAndFlush(userToUpdate));
+
+    }
+
+
     private void validateUser(User user) {
         if (user == null) {
             throw new NotFoundException("User not found");
@@ -166,17 +189,55 @@ public class UserServiceImpl implements UserService {
     }
 
     private void validateProfile(UserRequestDto userRequestDto) {
-        if (userRequestDto == null) throw new BadRequestException("User request is required");
-
-        Profile profile = profileMapper.dtoToEntity(userRequestDto.getProfile());
+        validateUserRequestDto(userRequestDto);
         CredentialsDto credentials = userRequestDto.getCredentials();
 
-        if (profile == null) throw new BadRequestException("Profile is required");
-        if ((profile.getEmail() == null)) throw new BadRequestException("Email is required");
-        if (profile.getFirstName() == null) throw new BadRequestException("First name is required");
-        if (profile.getLastName().isBlank()) throw new BadRequestException("Last name is required");
-        if (profile.getPhone().isBlank()) throw new BadRequestException("Phone is required");
+        validateCredentialObject(credentials);
+        validateProfileObject(userRequestDto.getProfile());
+        validateFirstLastName(userRequestDto.getProfile());
+        validateEmail(userRequestDto.getProfile());
+        validatePhoneNumber(userRequestDto.getProfile());
+        validateUsernamePasswordPresent(credentials);
+    }
+
+    private void validatePatchingProfile(UserRequestDto userRequestDto) {
+        validateUserRequestDto(userRequestDto);
+
+        validateCredentialObject(userRequestDto.getCredentials());
+        validateUsernamePasswordPresent(userRequestDto.getCredentials());
+        validateProfileObject(userRequestDto.getProfile());
+
+    }
+
+    private static void validateUsernamePasswordPresent(CredentialsDto credentials) {
         if (credentials.getPassword() == null) throw new BadRequestException("Password is required");
         if (credentials.getUsername() == null) throw new BadRequestException("Username is required");
     }
+
+    private static void validatePhoneNumber(ProfileDto profile) {
+        if (profile.getPhone().isBlank()) throw new BadRequestException("Phone is required");
+    }
+
+    private static void validateFirstLastName(ProfileDto profile) {
+        if (profile.getFirstName() == null) throw new BadRequestException("First name is required");
+        if (profile.getLastName().isBlank()) throw new BadRequestException("Last name is required");
+    }
+
+    private static void validateEmail(ProfileDto profile) {
+        if ((profile.getEmail() == null)) throw new BadRequestException("Email is required");
+    }
+
+    private static void validateProfileObject(ProfileDto profile) {
+        if (profile == null) throw new BadRequestException("Profile is required");
+    }
+
+    private static void validateCredentialObject(CredentialsDto credentials) {
+        if (credentials == null) throw new BadRequestException("Credentials are required");
+    }
+
+    private void validateUserRequestDto(UserRequestDto userRequestDto) {
+        if (userRequestDto == null) throw new BadRequestException("User request is required");
+    }
+
+
 }
