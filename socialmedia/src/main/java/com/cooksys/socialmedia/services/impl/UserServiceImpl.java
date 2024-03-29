@@ -182,13 +182,12 @@ public class UserServiceImpl implements UserService {
         List<User> followers = user.getFollowers();
         List<User> following = subscriber.getFollowing();
 
-        // if (followers.contains(subscriber) || following.contains(user)) {
-        //     throw new BadRequestException("User " + subscriber + " is already following " + user);
-        // } 
+        if (followers.contains(subscriber) || following.contains(user)) {
+            throw new BadRequestException("User " + subscriber.getCredentials().getUsername() + " is already following " + user.getCredentials().getUsername());
+        } 
 
         if (user.getCredentials().equals(subscriber.getCredentials())) {
-            // throw new BadRequestException("User cannot follow themself");
-            throw new BadRequestException(subscriber.getFollowers().toString());
+            throw new BadRequestException("User cannot follow themself");
         }
         else {
             following.add(user);
