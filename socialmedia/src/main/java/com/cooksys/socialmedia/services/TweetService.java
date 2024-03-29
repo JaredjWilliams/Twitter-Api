@@ -1,6 +1,8 @@
 package com.cooksys.socialmedia.services;
 
 
+import com.cooksys.socialmedia.dtos.ContextDto;
+
 import com.cooksys.socialmedia.dtos.CredentialsDto;
 import com.cooksys.socialmedia.dtos.tweet.TweetRequestDto;
 import com.cooksys.socialmedia.dtos.tweet.TweetResponseDto;
@@ -19,7 +21,7 @@ public interface TweetService {
 
     List<TweetResponseDto> getTweetResposts(Long id);
 
-    //ContextDto getContext(TweetRequestDto tweetRequestDto);
+    ContextDto getTweetContext(Long id);
 
     List<UserResponseDto> getMentions(Long id);
 
@@ -36,6 +38,7 @@ public interface TweetService {
     void createLike(Long id, CredentialsDto credentialsDto);
 
     TweetResponseDto getTweetById(Long id);
+
 
 
 

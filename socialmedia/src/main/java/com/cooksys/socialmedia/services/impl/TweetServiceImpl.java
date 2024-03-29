@@ -1,5 +1,8 @@
 package com.cooksys.socialmedia.services.impl;
 
+
+import com.cooksys.socialmedia.dtos.ContextDto;
+
 import com.cooksys.socialmedia.dtos.CredentialsDto;
 import com.cooksys.socialmedia.dtos.tweet.TweetRequestDto;
 import com.cooksys.socialmedia.dtos.tweet.TweetResponseDto;
@@ -162,17 +165,10 @@ public class TweetServiceImpl implements TweetService {
         return tweetMapper.entitiesToResponseDtos(Filter.byNotDeleted(tweet.getReposts()));
     }
 
-    /*@Override
-    public ContextDto getContext(TweetRequestDto tweetDto) {
-        Tweet tweet = tweetMapper.requestDtoToEntity(tweetDto);
-        if (!isTweetDeleted(tweet)){
-            ContextDto contextDto 
-        }
-        throw new NotFoundException("This tweet has been deleted");
-    }
-    public boolean isTweetDeleted(tweet){
+    
+    public boolean isTweetDeleted(Tweet tweet){
         return tweet != null && tweet.getDeleted();
-    }*/
+    }
 
     @Override
     public List<UserResponseDto> getMentions(Long id) {
@@ -320,4 +316,30 @@ public class TweetServiceImpl implements TweetService {
         }
     }
 
+    @Override
+    public ContextDto getTweetContext(Long id) {
+        Tweet tweet = getTweet(id);
+        validateTweet(tweet);
+        
+        //after creation and filling of all replies and reposts
+        List<TweetResponseDto> after = new ArrayList<>();
+        after.addAll(tweetMapper.entitiesToResponseDtos(tweet.getReplies()));
+        after.addAll(tweetMapper.entitiesToResponseDtos(tweet.getReposts()));
+
+        // before creation
+        List<TweetResponseDto> before = new ArrayList<>();
+
+        // before filling of all replies
+        before.add(tweetMapper.entityToResponseDto(tweet.getInReplyTo()));
+        // before filling of all reposts
+        before.add(tweetMapper.entityToResponseDto(tweet.getRepostOf()));
+
+        // contextDto creation
+        ContextDto contextDto = new ContextDto();
+        contextDto.setAfter(after);
+        contextDto.setBefore(before);
+        contextDto.setTarget(tweetMapper.entityToResponseDto(tweet));
+
+        return contextDto;
+    }
 }
