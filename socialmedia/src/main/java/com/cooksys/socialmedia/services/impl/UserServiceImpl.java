@@ -150,6 +150,7 @@ public class UserServiceImpl implements UserService {
         User userUnfollowing = userRepository.findByCredentialsUsername(username);
         User currentlyFollowedUser = userRepository.findByCredentialsUsername(credentialsDto.getUsername());
         validateUser(currentlyFollowedUser);
+        validateUser(userUnfollowing);
         
         List<User> userFollowing = userUnfollowing.getFollowing();
 
