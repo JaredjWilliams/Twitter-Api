@@ -358,6 +358,11 @@ public class TweetServiceImpl implements TweetService {
         Tweet tweet = getTweet(id);
         validateTweet(tweet);
 
-        return hashtagMapper.entitiesToDtos(tweet.getHashtags());
+        List<Hashtag> hashtags = tweet.getHashtags(); 
+        for (Hashtag hashtag : hashtags) {
+            hashtag.setLabel(hashtag.getLabel().substring(1));
+        }
+
+        return hashtagMapper.entitiesToDtos(hashtags);
     }
 }

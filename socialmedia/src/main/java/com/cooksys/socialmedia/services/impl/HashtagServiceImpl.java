@@ -2,6 +2,7 @@ package com.cooksys.socialmedia.services.impl;
 
 import com.cooksys.socialmedia.dtos.HashtagDto;
 import com.cooksys.socialmedia.dtos.tweet.TweetResponseDto;
+import com.cooksys.socialmedia.entities.Hashtag;
 import com.cooksys.socialmedia.entities.Tweet;
 import com.cooksys.socialmedia.exceptions.BadRequestException;
 import com.cooksys.socialmedia.mappers.HashtagMapper;
@@ -37,6 +38,10 @@ public class HashtagServiceImpl implements HashtagService {
 
     @Override
     public List<HashtagDto> getHashtags() {
-        return hashtagMapper.entitiesToDtos(hashtagRepository.findAll());
+        List<Hashtag> hashtags = hashtagRepository.findAll();
+        for (Hashtag hashtag : hashtags) {
+            hashtag.setLabel(hashtag.getLabel().substring(1));
+        }
+        return hashtagMapper.entitiesToDtos(hashtags);
     }
 }
