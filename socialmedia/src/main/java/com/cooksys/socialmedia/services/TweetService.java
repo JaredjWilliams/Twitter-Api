@@ -32,4 +32,7 @@ public interface TweetService {
     TweetResponseDto postRepostOfTweet(Long id, CredentialsDto credentialsDto);
 
     TweetResponseDto getTweetById(Long id);
+    void createLike (Long id, CredentialsDto credentialsDto);
+
+    
 }

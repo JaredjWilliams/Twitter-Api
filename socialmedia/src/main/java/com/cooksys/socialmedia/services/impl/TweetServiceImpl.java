@@ -8,6 +8,7 @@ import com.cooksys.socialmedia.entities.Hashtag;
 import com.cooksys.socialmedia.entities.Tweet;
 import com.cooksys.socialmedia.entities.User;
 import com.cooksys.socialmedia.exceptions.BadRequestException;
+import com.cooksys.socialmedia.exceptions.NotAuthorizedException;
 import com.cooksys.socialmedia.exceptions.NotFoundException;
 import com.cooksys.socialmedia.mappers.TweetMapper;
 import com.cooksys.socialmedia.mappers.UserMapper;
@@ -21,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -136,20 +138,6 @@ public class TweetServiceImpl implements TweetService {
         validateTweet(tweet);
         return tweetMapper.entityToResponseDto(tweet);
     }
-    
-    @Override
-    public TweetResponseDto deleteTweet(Long id, CredentialsDto credentialsDto) {
-        Tweet tweetToBeDeleted = getTweet(id);
-        validateTweet(tweetToBeDeleted);
-
-        if (!tweetToBeDeleted.getAuthor().equals(userRepository.findByCredentialsUsername(credentialsDto.getUsername()))){
-            throw new BadRequestException("The specified user does not exist or is not the author of this tweet.");
-        }
-        
-        tweetToBeDeleted.setDeleted(true);
-        tweetRepository.saveAndFlush(tweetToBeDeleted);
-        return tweetMapper.entityToResponseDto(tweetToBeDeleted);
-    }
 
     private Tweet createReplyTweet(TweetRequestDto tweetRequestDto, Tweet tweet) {
         Tweet replyTweet = tweetMapper.requestDtoToEntity(tweetRequestDto);
@@ -209,6 +197,45 @@ public class TweetServiceImpl implements TweetService {
         if (tweet.getDeleted()) {
             throw new NotFoundException("Tweet has been deleted");
         }
+    }
+
+    private void validateCredentials(User user, CredentialsDto credentialsDto) {
+        if (!user.getCredentials().getPassword().equals(credentialsDto.getPassword())){
+            throw new NotAuthorizedException("Incorrect password for user: " + credentialsDto.getUsername());
+        }
+    }
+
+    @Override
+    public void createLike(Long id, CredentialsDto credentialsDto) {
+        Tweet tweet = getTweet(id);
+        validateTweet(tweet);
+
+        User user = getUser(credentialsDto.getUsername());
+        validateCredentials(user, credentialsDto);
+
+        List<User> userLikes = tweet.getUserLikes();
+        userLikes.add(user);
+        tweet.setUserLikes(userLikes);
+        tweetRepository.saveAndFlush(tweet);
+
+        List<Tweet> tweetLikes = user.getTweetLikes();
+        tweetLikes.add(tweet);
+        user.setTweetLikes(tweetLikes);
+        userRepository.saveAndFlush(user);
+    }
+
+    @Override
+    public TweetResponseDto deleteTweet(Long id, CredentialsDto credentialsDto) {
+        Tweet tweetToBeDeleted = getTweet(id);
+        validateTweet(tweetToBeDeleted);
+
+        if (!tweetToBeDeleted.getAuthor().equals(userRepository.findByCredentialsUsername(credentialsDto.getUsername()))){
+            throw new BadRequestException("The specified user does not exist or is not the author of this tweet.");
+        }
+        
+        tweetToBeDeleted.setDeleted(true);
+        tweetRepository.saveAndFlush(tweetToBeDeleted);
+        return tweetMapper.entityToResponseDto(tweetToBeDeleted);
     }
 
     private void validateTweet(TweetRequestDto tweetRequestDto) {
