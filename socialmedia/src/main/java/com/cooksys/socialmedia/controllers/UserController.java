@@ -92,4 +92,5 @@ public class UserController {
     public void unfollowUser(@PathVariable("username") String username, @RequestBody CredentialsDto credentialsDto) {
         userService.unfollowUser(username, credentialsDto);
     }
+
 }

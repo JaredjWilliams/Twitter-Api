@@ -22,6 +22,11 @@ public class Seeder implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
 
+//        execute();
+
+    }
+
+    private void execute() {
         // --- User 1 ---
         // Credentials
         Credentials user1Cred = new Credentials();
@@ -244,7 +249,7 @@ public class Seeder implements CommandLineRunner {
 
         user3.setTweetLikes(user2Tweets);
         userRepository.saveAndFlush(user3);
-        
+
         deletedUser.setTweetLikes(user2Tweets);
         userRepository.saveAndFlush(deletedUser);
 

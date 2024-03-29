@@ -4,6 +4,7 @@ import com.cooksys.socialmedia.dtos.CredentialsDto;
 import com.cooksys.socialmedia.dtos.tweet.TweetResponseDto;
 import com.cooksys.socialmedia.dtos.user.UserRequestDto;
 import com.cooksys.socialmedia.dtos.user.UserResponseDto;
+import com.cooksys.socialmedia.entities.Profile;
 import com.cooksys.socialmedia.entities.User;
 import com.cooksys.socialmedia.exceptions.BadRequestException;
 import com.cooksys.socialmedia.exceptions.NotAuthorizedException;
@@ -15,6 +16,7 @@ import com.cooksys.socialmedia.mappers.UserMapper;
 import com.cooksys.socialmedia.repositories.UserRepository;
 import com.cooksys.socialmedia.services.UserService;
 import com.cooksys.socialmedia.utils.Sort;
+import com.cooksys.socialmedia.utils.Validate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -42,7 +44,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponseDto createUser(UserRequestDto userRequestDto) {
-
+        Validate.validateCreatingAUser(userRequestDto);
         User user = getUserByCredentials(userRequestDto.getCredentials());
 
         if (isUserCreatedAndNotDeleted(user)) {
@@ -56,7 +58,7 @@ public class UserServiceImpl implements UserService {
 
         return userMapper.entityToResponseDto(userRepository.saveAndFlush(userMapper.requestDtoToEntity(userRequestDto)));
     }
-    
+
     @Override
     public List<TweetResponseDto> getTweetsFromUser(String username) {
         User user = userRepository.findByCredentialsUsername(username);
@@ -93,15 +95,6 @@ public class UserServiceImpl implements UserService {
         return userMapper.entityToResponseDto(user);
     }
 
-    private void validateUser(User user) {
-        if (user == null) {
-            throw new NotFoundException("User not found");
-        }
-
-        if (user.getDeleted()) {
-            throw new BadRequestException("User has been deleted");
-        }
-    }
 
     private void validateCredentials(User user, CredentialsDto credentialsDto) {
         if (!user.getCredentials().getPassword().equals(credentialsDto.getPassword())){
@@ -124,26 +117,33 @@ public class UserServiceImpl implements UserService {
         return userMapper.entitiesToResponseDtos(followingUsers);
     }
 
-    private boolean isUserCreatedAndNotDeleted(User user) {
-        return user != null && !user.getDeleted();
-    }
-
-    private boolean isUserDeleted(User user) {
-        return user != null && user.getDeleted();
-    }
-
-
+    @Override
     public UserResponseDto updateUser(String username, UserRequestDto userRequestDto) {
-        User curUser = userRepository.findByCredentialsUsername(username);
-        validateUser(curUser);
+        User user = userRepository.findByCredentialsUsername(username);
+        validateUser(user);
+        Validate.patchingProfile(userRequestDto);
         User updatedUser = userMapper.requestDtoToEntity(userRequestDto);
-        if (curUser.getCredentials().equals(updatedUser.getCredentials())) {
-            curUser.setProfile(updatedUser.getProfile());
-            userRepository.saveAndFlush(curUser);
 
-            return userMapper.entityToResponseDto(curUser);
+        if (!user.getCredentials().equals(updatedUser.getCredentials())) {
+            throw new BadRequestException("The user's username or password doesn't match the user's given in the request body.");
         }
-        throw new BadRequestException("The user's username or password doesn't match the user's given in the request body.");
+
+        Profile updatesToProfile = updatedUser.getProfile();
+
+        if (updatesToProfile.getEmail() != null) {
+            user.getProfile().setEmail(updatesToProfile.getEmail());
+        }
+        if (updatesToProfile.getPhone() != null) {
+            user.getProfile().setPhone(updatesToProfile.getPhone());
+        }
+        if (updatesToProfile.getFirstName() != null) {
+            user.getProfile().setFirstName(updatesToProfile.getFirstName());
+        }
+        if (updatesToProfile.getLastName() != null) {
+            user.getProfile().setLastName(updatesToProfile.getLastName());
+        }
+
+        return userMapper.entityToResponseDto(userRepository.saveAndFlush(user));
     }
 
     public void unfollowUser(String username, CredentialsDto credentialsDto) {
@@ -161,6 +161,24 @@ public class UserServiceImpl implements UserService {
         userFollowing.remove(currentlyFollowedUser);
         userUnfollowing.setFollowing(userFollowing);
         userRepository.saveAndFlush(userUnfollowing);
+    }
+
+    private void validateUser(User user) {
+        if (user == null) {
+            throw new NotFoundException("User not found");
+        }
+
+        if (user.getDeleted()) {
+            throw new BadRequestException("User has been deleted");
+        }
+    }
+
+    private boolean isUserCreatedAndNotDeleted(User user) {
+        return user != null && !user.getDeleted();
+    }
+
+    private boolean isUserDeleted(User user) {
+        return user != null && user.getDeleted();
     }
 
     @Override
