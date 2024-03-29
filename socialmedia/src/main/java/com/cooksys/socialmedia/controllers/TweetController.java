@@ -18,6 +18,12 @@ public class TweetController {
 
     private final TweetService tweetService;
 
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public TweetResponseDto createTweet(@RequestBody TweetRequestDto tweetRequestDto) {
+        return tweetService.createTweet(tweetRequestDto);
+    }
+
     @PostMapping("/{id}/reply")
     @ResponseStatus(HttpStatus.CREATED)
     public TweetResponseDto replyToTweet(@PathVariable("id") Long id, @RequestBody TweetRequestDto tweetRequestDto) {

@@ -21,11 +21,7 @@ import com.cooksys.socialmedia.utils.Process;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 
 @Service
@@ -66,7 +62,7 @@ public class TweetServiceImpl implements TweetService {
         Tweet tweet = getTweet(id);
 
         validateTweet(tweet);
-        validateUsername(tweetRequestDto.getCredentialsDto().getUsername());
+        validateUsername(tweetRequestDto.getCredentials().getUsername());
         validateTweet(tweetRequestDto);
 
         Tweet replyTweet = createReplyTweet(tweetRequestDto, tweet);
@@ -86,6 +82,80 @@ public class TweetServiceImpl implements TweetService {
     }
 
     @Override
+    public TweetResponseDto createTweet(TweetRequestDto tweetRequestDto) {
+
+        String username = tweetRequestDto.getCredentials().getUsername();
+        String password = tweetRequestDto.getCredentials().getPassword();
+
+        if (tweetRequestDto.getContent() == null || tweetRequestDto.getContent().isEmpty()) {
+            throw new BadRequestException("Tweet must have content in request body to be created.");
+        }
+
+        if (tweetRequestDto.getCredentials() == null) {
+            throw new BadRequestException("Tweet must have credentials in request body to be created.");
+        }
+
+        if (userRepository.findByCredentialsUsername(tweetRequestDto.getCredentials().getUsername()) == null) {
+            throw new NotFoundException("User not found with given username: " + username); 
+        }
+        else if(!userRepository.findByCredentialsUsername(username).getCredentials().getPassword().equals(password)) {
+            throw new BadRequestException("Incorrect password for user: " + username);
+        }
+        
+
+        Tweet tweet =  tweetMapper.requestDtoToEntity(tweetRequestDto);
+        tweet.setAuthor(userRepository.findByCredentialsUsername(username));
+
+        String[] content = tweet.getContent().split("\\s+");
+        List<User> usersMentioned = new ArrayList<>();
+
+        // Map user mentions
+        for (String subString : content) {
+            if (subString.charAt(0) == '@') {
+                User userMentioned = userRepository.findByCredentialsUsername(subString.substring(1));
+
+                if (userMentioned != null) {
+                    List<Tweet> tweets = userMentioned.getTweetMentions();
+                    tweets.add(tweet);
+                    userMentioned.setTweetMentions(tweets);
+                    usersMentioned.add(userMentioned);
+                    userRepository.saveAndFlush(userMentioned);
+                }
+            }
+        }
+
+        tweet.setUserMentions(usersMentioned);
+        tweetRepository.saveAndFlush(tweet);
+
+
+        // Map user hashtags
+        for (String subString : content) {
+            // Add hashtag to tweet 
+            if (subString.charAt(0) == '#') {
+
+                Hashtag hashtag = hashtagRepository.findByLabel(subString); 
+
+                // Check if hashtag already exists in hashtagRepository
+                if (hashtag == null) {
+                    // Create new hashtag in repository 
+                    Hashtag newHashtag = new Hashtag();
+                    newHashtag.setLabel(subString);
+                    newHashtag.setFirstUsed(tweet.getPosted());
+                    newHashtag.setLastUsed(tweet.getPosted());
+                    newHashtag.setTweets(Arrays.asList(tweet));
+                    hashtagRepository.saveAndFlush(newHashtag);
+                }
+
+                // Update timestamp if hashtag is already saved
+                else {
+                    hashtag.setLastUsed(tweet.getPosted());
+                }
+
+            }
+        }
+
+        return tweetMapper.entityToResponseDto(tweet);
+    }
     public List<TweetResponseDto> getTweetResposts(Long id) {
         Tweet tweet = getTweet(id);
         validateTweet(tweet);
@@ -141,7 +211,7 @@ public class TweetServiceImpl implements TweetService {
 
     private Tweet createReplyTweet(TweetRequestDto tweetRequestDto, Tweet tweet) {
         Tweet replyTweet = tweetMapper.requestDtoToEntity(tweetRequestDto);
-        replyTweet.setAuthor(getUser(tweetRequestDto.getCredentialsDto().getUsername()));
+        replyTweet.setAuthor(getUser(tweetRequestDto.getCredentials().getUsername()));
         replyTweet.setInReplyTo(tweet);
         replyTweet.setUserMentions(createUserMentions(replyTweet));
         return tweetRepository.saveAndFlush(replyTweet);
