@@ -1,5 +1,6 @@
 package com.cooksys.socialmedia.controllers;
 
+import com.cooksys.socialmedia.dtos.HashtagDto;
 import com.cooksys.socialmedia.dtos.tweet.TweetResponseDto;
 import com.cooksys.socialmedia.services.HashtagService;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,11 @@ public class HashtagController {
     @ResponseStatus(HttpStatus.OK)
     public List<TweetResponseDto> getHashtagsByLabel(@PathVariable("label") String label) {
         return hashtagService.getHashtagsByLabel(label);
+    }
+
+    @GetMapping
+    public List<HashtagDto> getHashtags() {
+        return hashtagService.getHashtags();
     }
 
 }
