@@ -119,15 +119,17 @@ public class TweetServiceImpl implements TweetService {
     @Override
     public TweetResponseDto createTweet(TweetRequestDto tweetRequestDto) {
 
-        String username = tweetRequestDto.getCredentials().getUsername();
-        String password = tweetRequestDto.getCredentials().getPassword();
-
-        if (tweetRequestDto.getContent() == null || tweetRequestDto.getContent().isEmpty()) {
-            throw new BadRequestException("Tweet must have content in request body to be created.");
-        }
+        
 
         if (tweetRequestDto.getCredentials() == null) {
             throw new BadRequestException("Tweet must have credentials in request body to be created.");
+        } 
+
+        String username = tweetRequestDto.getCredentials().getUsername();
+        String password = tweetRequestDto.getCredentials().getPassword();
+        
+        if (tweetRequestDto.getContent() == null || tweetRequestDto.getContent().isEmpty()) {
+            throw new BadRequestException("Tweet must have content in request body to be created.");
         }
 
         if (userRepository.findByCredentialsUsername(tweetRequestDto.getCredentials().getUsername()) == null) {
@@ -139,7 +141,9 @@ public class TweetServiceImpl implements TweetService {
         
 
         Tweet tweet =  tweetMapper.requestDtoToEntity(tweetRequestDto);
-        tweet.setAuthor(userRepository.findByCredentialsUsername(username));
+        User user = userRepository.findByCredentialsUsername(username);
+        validateCredentials(user, tweetRequestDto.getCredentials());
+        tweet.setAuthor(user);
 
         String[] content = tweet.getContent().split("\\s+");
         List<User> usersMentioned = new ArrayList<>();
